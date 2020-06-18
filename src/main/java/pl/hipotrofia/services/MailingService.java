@@ -18,7 +18,7 @@ public class MailingService {
         this.javaMailSender = javaMailSender;
     }
 
-    
+
     public void sendMail(String to,
                          String subject,
                          String text,

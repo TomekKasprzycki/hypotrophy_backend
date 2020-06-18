@@ -26,7 +26,7 @@ public class Articles {
     private LocalDate created;
     @NotNull
     @ManyToMany
-    @JoinColumn(name="user_id", referencedColumnName = "id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private List<User> author;
     @ManyToOne
     private User modifiedBy;

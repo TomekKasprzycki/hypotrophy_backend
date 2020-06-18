@@ -33,13 +33,13 @@ public class User {
     private LocalDate passwordChange;
     @ManyToMany(mappedBy = "author")
     private List<Articles> article;
-    
-    public void setPassword(String unHashedPassword){
-        this.password=BCrypt.hashpw(unHashedPassword, BCrypt.gensalt());
+
+    public void setPassword(String unHashedPassword) {
+        this.password = BCrypt.hashpw(unHashedPassword, BCrypt.gensalt());
     }
 
-    public Boolean checkPassword(String unHashedPassword){
-        return BCrypt.checkpw(unHashedPassword,this.password);
+    public Boolean checkPassword(String unHashedPassword) {
+        return BCrypt.checkpw(unHashedPassword, this.password);
     }
 
 

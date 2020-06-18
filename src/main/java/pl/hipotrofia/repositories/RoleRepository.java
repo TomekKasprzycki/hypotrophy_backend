@@ -9,4 +9,6 @@ import pl.hipotrofia.entities.Role;
 @Transactional
 public interface RoleRepository extends JpaRepository<Role, Long> {
 
+    Role getRoleById(Long id);
+
 }
