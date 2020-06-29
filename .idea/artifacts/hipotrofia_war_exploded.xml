@@ -53,8 +53,6 @@
           <element id="library" level="project" name="Maven: org.slf4j:jul-to-slf4j:1.7.30" />
           <element id="library" level="project" name="Maven: org.yaml:snakeyaml:1.26" />
           <element id="library" level="project" name="Maven: org.springframework.boot:spring-boot-starter-json:2.3.0.RELEASE" />
-          <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.11.0" />
-          <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-core:2.11.0" />
           <element id="library" level="project" name="Maven: com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.11.0" />
           <element id="library" level="project" name="Maven: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.0" />
           <element id="library" level="project" name="Maven: com.fasterxml.jackson.module:jackson-module-parameter-names:2.11.0" />
@@ -86,6 +84,9 @@
           <element id="library" level="project" name="Maven: org.springframework.plugin:spring-plugin-metadata:1.2.0.RELEASE" />
           <element id="library" level="project" name="Maven: org.mapstruct:mapstruct:1.2.0.Final" />
           <element id="library" level="project" name="Maven: io.springfox:springfox-swagger-ui:2.9.2" />
+          <element id="library" level="project" name="Maven: io.jsonwebtoken:jjwt:0.9.1" />
+          <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.11.0" />
+          <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-core:2.11.0" />
           <element id="library" level="project" name="Maven: jakarta.xml.bind:jakarta.xml.bind-api:2.3.3" />
           <element id="library" level="project" name="Maven: jakarta.activation:jakarta.activation-api:1.2.2" />
           <element id="library" level="project" name="Maven: org.springframework:spring-core:5.2.6.RELEASE" />

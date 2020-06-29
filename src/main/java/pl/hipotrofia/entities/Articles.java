@@ -27,11 +27,14 @@ public class Articles {
     @NotNull
     @ManyToMany
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private List<User> author;
+    private List<User> authors;
     @ManyToOne
     private User modifiedBy;
     private LocalDate dateOfModification;
     @ManyToMany(mappedBy = "article")
     private List<Tag> tag;
+    @OneToMany(mappedBy = "article")
+    private List<Message> messages;
+    private int page;
 
 }

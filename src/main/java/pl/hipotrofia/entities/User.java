@@ -33,6 +33,11 @@ public class User {
     private LocalDate passwordChange;
     @ManyToMany(mappedBy = "author")
     private List<Articles> article;
+    @OneToMany(mappedBy = "author")
+    private List<Message> messages;
+    @OneToMany(mappedBy = "user")
+    private List<Children> children;
+
 
     public void setPassword(String unHashedPassword) {
         this.password = BCrypt.hashpw(unHashedPassword, BCrypt.gensalt());
@@ -41,6 +46,5 @@ public class User {
     public Boolean checkPassword(String unHashedPassword) {
         return BCrypt.checkpw(unHashedPassword, this.password);
     }
-
 
 }

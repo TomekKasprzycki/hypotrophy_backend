@@ -20,7 +20,7 @@ public class Doctor {
     private String street;
     private String building_number;
     @ManyToMany
-    @JoinColumn(name = "doctor_id", referencedColumnName = "id")
+    @JoinColumn(name = "specialization_id", referencedColumnName = "id")
     private List<Specialization> specialization;
 
 }

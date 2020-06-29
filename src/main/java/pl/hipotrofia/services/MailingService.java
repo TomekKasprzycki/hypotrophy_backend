@@ -24,7 +24,6 @@ public class MailingService {
                          String text,
                          boolean isHtmlContent) throws MessagingException {
 
-
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
         mimeMessageHelper.setTo(to);

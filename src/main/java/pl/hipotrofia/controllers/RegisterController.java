@@ -1,6 +1,7 @@
 package pl.hipotrofia.controllers;
 
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pl.hipotrofia.dto.UserDto;
 import pl.hipotrofia.services.UserService;
@@ -14,8 +15,9 @@ public class RegisterController {
         this.userService = userService;
     }
 
+
     @PostMapping("/api/registration")
-    public boolean registerUser(UserDto userDto) {
+    public boolean registerUser(@RequestBody UserDto userDto) {
         return userService.registerUser(userDto);
     }
 
