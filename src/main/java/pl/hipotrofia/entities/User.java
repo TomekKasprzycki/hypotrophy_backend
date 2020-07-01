@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
 
 import javax.persistence.*;
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -29,9 +29,9 @@ public class User {
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;
     @NotNull
-    private LocalDate created;
-    private LocalDate passwordChange;
-    @ManyToMany(mappedBy = "author")
+    private Date created;
+    private Date passwordChange;
+    @ManyToMany(mappedBy = "authors")
     private List<Articles> article;
     @OneToMany(mappedBy = "author")
     private List<Message> messages;

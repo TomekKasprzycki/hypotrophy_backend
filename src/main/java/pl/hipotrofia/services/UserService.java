@@ -7,7 +7,7 @@ import pl.hipotrofia.entities.User;
 import pl.hipotrofia.repositories.UserRepository;
 import pl.hipotrofia.validators.UserValidator;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 @Service
 public class UserService {
@@ -29,9 +29,10 @@ public class UserService {
 
     public boolean registerUser(UserDto userDto) {
 
+        long milis = System.currentTimeMillis();
         if (userValidator.isTheUserValid(userDto)) {
             User user = userDtoConverter.convertFromDto(userDto);
-            user.setCreated(LocalDate.now());
+            user.setCreated(new Date(milis));
             user.setRole(roleService.getRole(3L));
             userRepository.save(user);
             return true;

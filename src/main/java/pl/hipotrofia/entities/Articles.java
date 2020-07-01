@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -23,14 +23,14 @@ public class Articles {
     @Column(columnDefinition = "varchar(5000)") //we need to set good length of text - max 65k of characters
     private String contents;
     @NotNull
-    private LocalDate created;
+    private Date created;
     @NotNull
     @ManyToMany
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private List<User> authors;
     @ManyToOne
     private User modifiedBy;
-    private LocalDate dateOfModification;
+    private Date dateOfModification;
     @ManyToMany(mappedBy = "article")
     private List<Tag> tag;
     @OneToMany(mappedBy = "article")

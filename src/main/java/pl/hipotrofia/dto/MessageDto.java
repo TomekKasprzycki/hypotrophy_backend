@@ -2,7 +2,7 @@ package pl.hipotrofia.dto;
 
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 @Data
 public class MessageDto {
@@ -11,6 +11,6 @@ public class MessageDto {
     private String contents;
     private String author;
     private Long articleId;
-    private LocalDate created;
+    private Date created;
 
 }

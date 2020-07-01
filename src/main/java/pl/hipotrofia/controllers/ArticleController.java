@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pl.hipotrofia.converters.ArticleDtoConverter;
 import pl.hipotrofia.dto.ArticleDto;
-import pl.hipotrofia.entities.Articles;
 import pl.hipotrofia.services.ArticlesService;
 
 import java.util.List;
@@ -28,14 +27,5 @@ public class ArticleController {
 
         return articleDtoConverter.convertToDto(articlesService.findArticlesByPages(page));
     }
-
-    @GetMapping("/articlesByAuthor")
-    public List<ArticleDto> getArticlesByAuthor(@RequestParam String author) {
-
-        List<Articles> articles = articlesService.findArticlesByAuthor(author).orElse(null);
-
-        return articles != null ? articleDtoConverter.convertToDto(articles) : null;
-    }
-
 
 }

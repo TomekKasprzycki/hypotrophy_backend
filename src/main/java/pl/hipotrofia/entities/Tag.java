@@ -19,7 +19,5 @@ public class Tag {
     @ManyToMany
     @JoinColumn(name = "article_id", referencedColumnName = "id")
     private List<Articles> article;
-    @ManyToMany
-    @JoinColumn(name = "message_id", referencedColumnName = "id")
-    private List<Message> message;
+
 }

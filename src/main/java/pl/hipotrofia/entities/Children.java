@@ -3,7 +3,7 @@ package pl.hipotrofia.entities;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -24,6 +24,6 @@ public class Children {
     private Gender gender;
     @OneToMany(mappedBy = "child")
     private List<Measurement> childData;
-    private LocalDate dateOfBirth;
+    private Date dateOfBirth;
 
 }
