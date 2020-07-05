@@ -1,6 +1,5 @@
 package pl.hipotrofia.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import pl.hipotrofia.converters.TagDtoConverter;
 import pl.hipotrofia.dto.TagDto;
@@ -10,13 +9,16 @@ import pl.hipotrofia.services.TagService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/tags")
+@RequestMapping("/api/tags")
 public class TagController {
 
-    @Autowired
-    private TagService tagService;
-    @Autowired
-    private TagDtoConverter tagDtoConverter;
+    private final TagService tagService;
+    private final TagDtoConverter tagDtoConverter;
+
+    public TagController(TagService tagService, TagDtoConverter tagDtoConverter) {
+        this.tagService = tagService;
+        this.tagDtoConverter = tagDtoConverter;
+    }
 
     @GetMapping("/getAllTags")
     public List<TagDto> getAllTags(){

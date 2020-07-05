@@ -33,7 +33,6 @@ public class SearchController {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         Date latestDate = null;
         Date earliestDate = null;
-//        List<ArticleDto> articles = new ArrayList<>();
 
         try {
             latestDate = formatter.parse(dateTo);
@@ -42,17 +41,14 @@ public class SearchController {
             ex.printStackTrace();
         }
 
-
             if (latestDate !=null && earliestDate !=null){
-                 return articleDtoConverter.convertToDto(articlesService.findArticlesBetweenDates(earliestDate, latestDate));
-            }
+                 return articleDtoConverter.convertToDto(articlesService.findArticlesBetweenDates(earliestDate, latestDate)); }
 
             if (latestDate == null && earliestDate != null) {
-                return articleDtoConverter.convertToDto(articlesService.findArticlesFromDate(earliestDate));
-            }
+                return articleDtoConverter.convertToDto(articlesService.findArticlesFromDate(earliestDate)); }
+
             if(latestDate !=null && earliestDate == null){
-                return articleDtoConverter.convertToDto(articlesService.findArticlesToDate(latestDate));
-            }
+                return articleDtoConverter.convertToDto(articlesService.findArticlesToDate(latestDate)); }
 
             return articleDtoConverter.convertToDto(articlesService.findAll());
     }

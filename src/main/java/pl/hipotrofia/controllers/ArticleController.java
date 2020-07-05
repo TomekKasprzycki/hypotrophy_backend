@@ -11,7 +11,7 @@ import pl.hipotrofia.services.ArticlesService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/articles")
+@RequestMapping("/api/articles")
 public class ArticleController {
 
     private final ArticleDtoConverter articleDtoConverter;

@@ -4,6 +4,9 @@ import org.springframework.stereotype.Service;
 import pl.hipotrofia.dto.MessageDto;
 import pl.hipotrofia.entities.Message;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class MessageDtoConverter {
 
@@ -26,6 +29,11 @@ public class MessageDtoConverter {
         message.setContents(messageDto.getContents());
 
         return message;
+    }
+
+    public List<MessageDto> convertToDto(List<Message> messages){
+
+        return messages.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
 }
