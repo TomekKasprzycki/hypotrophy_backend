@@ -28,13 +28,15 @@ public class Articles {
     @ManyToMany
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private List<User> authors;
-    @ManyToOne
-    private User modifiedBy;
-    private Date dateOfModification;
+    @OneToMany
+    private List<ArticleModification> changes;
     @ManyToMany(mappedBy = "article")
     private List<Tag> tag;
     @OneToMany(mappedBy = "article")
     private List<Message> messages;
     private int page;
+    private int priority; //on creation set value on 0
+    private int rank; //on creation set value on 0
+    private boolean visible;
 
 }

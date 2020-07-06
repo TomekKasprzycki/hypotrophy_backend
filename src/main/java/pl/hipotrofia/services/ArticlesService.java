@@ -44,4 +44,16 @@ public class ArticlesService {
     public Articles findArticleById(Long id) {
         return articleRepository.getOne(id);
     }
+
+    public List<Articles> findAllForAdmin() {
+        return articleRepository.getAllNotVisible();
+    }
+
+    public Articles addArticle(Articles article) {
+        return articleRepository.save(article);
+    }
+
+    public void removeArticle(Articles article) {
+        articleRepository.delete(article);
+    }
 }

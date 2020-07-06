@@ -32,6 +32,9 @@ public class ArticleDtoConverter {
         articleDto.setCreated(article.getCreated());
         articleDto.setTagsId(article.getTag().stream().map(Tag::getId).collect(Collectors.toList()));
         articleDto.setPage(article.getPage());
+        articleDto.setRank(article.getRank());
+        articleDto.setPriority(article.getPriority());
+        articleDto.setVisible(article.isVisible());
 
         return articleDto;
     }
@@ -45,6 +48,9 @@ public class ArticleDtoConverter {
         article.setAuthors(articleDto.getAuthors().stream().map(userService::findUserByEmail).collect(Collectors.toList()));
         article.setTag(articleDto.getTagsId().stream().map(tagService::findTagById).collect(Collectors.toList()));
         article.setPage(articleDto.getPage());
+        article.setRank(articleDto.getRank());
+        article.setPriority(articleDto.getPriority());
+        article.setVisible(articleDto.isVisible());
 
         return article;
     }

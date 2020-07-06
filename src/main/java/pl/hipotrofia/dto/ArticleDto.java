@@ -14,6 +14,10 @@ public class ArticleDto {
     private Date created;
     private List<String> authors;
     private List<Long> tagsId;
+    private String modifiedBy;
     private int page;
+    private int rank;
+    private int priority;
+    private boolean visible;
 
 }

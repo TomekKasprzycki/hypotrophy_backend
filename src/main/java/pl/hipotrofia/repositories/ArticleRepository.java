@@ -15,22 +15,24 @@ import java.util.Optional;
 @Transactional
 public interface ArticleRepository extends JpaRepository<Articles, Long> {
 
-    @Query("select a from Articles a where a.page=:page")
+    @Query("select a from Articles a where a.visible=true and a.page=:page")
     List<Articles> getAllByPage(@Param("page") int page);
 
-    @Query("select a from Articles a join fetch User u where u.email=:author")
+    @Query("select a from Articles a join fetch User u where a.visible=true and u.email=:author")
     Optional<List<Articles>> getAllByAuthor(@Param("author") String author);
 
-    @Query("select a from Articles a where a.created>=:earliestDate and a.created<=:latestDate")
+    @Query("select a from Articles a where a.visible=true and a.created>=:earliestDate and a.created<=:latestDate")
     List<Articles> getAllBetweenDates(@Param("earliestDate") Date earliestDate, @Param("latestDate") Date latestDate);
 
-    @Query("select a from Articles a where a.created>=:earliestDate")
+    @Query("select a from Articles a where a.visible=true and a.created>=:earliestDate")
     List<Articles> getAllFromDate(@Param("earliestDate") Date earliestDate);
 
-    @Query("select a from Articles a where a.created<=:latestDate")
+    @Query("select a from Articles a where a.visible=true and a.created<=:latestDate")
     List<Articles> getAllToDate(@Param("latestDate") Date latestDate);
 
-    @Query("select a from Articles a")
+    @Query("select a from Articles a where a.visible=true")
     List<Articles> getAll();
 
+    @Query("select a from Articles a where a.visible=false")
+    List<Articles> getAllNotVisible();
 }

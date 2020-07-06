@@ -37,6 +37,9 @@ public class User {
     private List<Message> messages;
     @OneToMany(mappedBy = "user")
     private List<Children> children;
+    private boolean active;
+    @OneToMany(mappedBy = "modifiedBy")
+    private List<ArticleModification> changes;
 
 
     public void setPassword(String unHashedPassword) {

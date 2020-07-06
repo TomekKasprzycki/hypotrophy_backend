@@ -23,5 +23,6 @@ public class Message {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User author;
     private Date created;
+    private Date dateOfModification;
 
 }
