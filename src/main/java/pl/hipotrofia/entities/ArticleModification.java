@@ -18,6 +18,6 @@ public class ArticleModification {
     private Date dateOfModification;
     @ManyToOne
     @JoinColumn(name = "article_id", referencedColumnName = "id")
-    private Articles articles;
+    private Articles article;
 
 }

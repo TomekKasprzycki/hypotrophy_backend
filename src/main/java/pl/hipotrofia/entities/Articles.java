@@ -24,11 +24,10 @@ public class Articles {
     private String contents;
     @NotNull
     private Date created;
-    @NotNull
     @ManyToMany
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private List<User> authors;
-    @OneToMany
+    @OneToMany(mappedBy = "article")
     private List<ArticleModification> changes;
     @ManyToMany(mappedBy = "article")
     private List<Tag> tag;
@@ -36,7 +35,7 @@ public class Articles {
     private List<Message> messages;
     private int page;
     private int priority; //on creation set value on 0
-    private int rank; //on creation set value on 0
+    private int rating; //on creation set value on 0
     private boolean visible;
 
 }

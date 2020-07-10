@@ -5,15 +5,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import pl.hipotrofia.entities.User;
+import pl.hipotrofia.entities.Children;
+
+import java.util.List;
 
 @Repository
 @Transactional
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface ChildrenRepository extends JpaRepository<Children, Long> {
 
-    @Query("select u from User u where u.email=:email")
-    User getUserByEmail(@Param("email") String email);
-
-    @Query("select u from User u where u.id=:parent")
-    User getUserById(@Param("parent") Long parent);
+    @Query("select c from Children c where c.user.id=:parentId")
+    List<Children> findAllByParentId(@Param("parentId") Long parentId);
 }

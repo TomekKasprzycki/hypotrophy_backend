@@ -43,4 +43,7 @@ public class UserService {
 
     public User findUserByEmail(String email){ return userRepository.getUserByEmail(email); }
 
+    public User findUserById(Long parent) {
+        return userRepository.getUserById(parent);
+    }
 }

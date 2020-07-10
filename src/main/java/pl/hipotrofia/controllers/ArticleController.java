@@ -46,25 +46,34 @@ public class ArticleController {
         return articleDtoConverter.convertToDto(articlesService.findAllForAdmin());
     }
 
+    @GetMapping("/setVisible")
+    public List<ArticleDto> setVisible(@RequestParam Long id){
+
+        Articles article = articlesService.findArticleById(id);
+        article.setVisible(true);
+        articlesService.addArticle(article);
+
+        return articleDtoConverter.convertToDto(articlesService.findAllForAdmin());
+    }
+
     @PostMapping("/addArticle")
-    public boolean addArticle(@RequestBody ArticleDto articleDto) {
+    public List<ArticleDto> addArticle(@RequestBody ArticleDto articleDto) {
 
         long milis = System.currentTimeMillis();
         Articles article = articleDtoConverter.convertFromDto(articleDto);
         article.setVisible(false); //it should be set on false on the frontend
         article.setPriority(0); //it should be set on 0 on the frontend
-        article.setRank(0); //it should be set on 0 on the frontend
+        article.setRating(0); //it should be set on 0 on the frontend
         article.setCreated(new Date(milis));
         article.setTag(articleDto.getTagsId().stream().map(tagService::findTagById).collect(Collectors.toList()));
-        article.setAuthors(articleDto.getAuthors().stream().map(userService::findUserByEmail).collect(Collectors.toList()));
+        article.setAuthors(articleDto.getAuthors().keySet().stream().map(userService::findUserById).collect(Collectors.toList()));
         try {
             articlesService.addArticle(article);
             //TODO send email to AdminMailingList
-            return true;
         } catch (HibernateException ex) {
             ex.printStackTrace();
-            return false;
         }
+        return articleDtoConverter.convertToDto(articlesService.findArticlesByPages(articleDto.getPage()));
     }
 
     @DeleteMapping("/delete")
@@ -85,7 +94,7 @@ public class ArticleController {
         long milis = System.currentTimeMillis();
         Articles article = articleDtoConverter.convertFromDto(articleDto);
         ArticleModification articleModification = new ArticleModification();
-        articleModification.setArticles(article);
+        articleModification.setArticle(article);
         articleModification.setDateOfModification(new Date(milis));
         articleModification.setModifiedBy(userService.findUserByEmail(articleDto.getModifiedBy()));
         List<ArticleModification> changes = article.getChanges() != null ? article.getChanges() : new ArrayList<>();
