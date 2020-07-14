@@ -1,5 +1,6 @@
 package pl.hipotrofia.services;
 
+import org.hibernate.HibernateException;
 import org.springframework.stereotype.Service;
 import pl.hipotrofia.converters.UserDtoConverter;
 import pl.hipotrofia.dto.UserDto;
@@ -27,15 +28,21 @@ public class UserService {
         this.roleService = roleService;
     }
 
-    public boolean registerUser(UserDto userDto) {
+    public boolean registerUser(UserDto userDto) throws HibernateException {
 
         long milis = System.currentTimeMillis();
         if (userValidator.isTheUserValid(userDto)) {
             User user = userDtoConverter.convertFromDto(userDto);
             user.setCreated(new Date(milis));
             user.setRole(roleService.getRole(3L));
-            userRepository.save(user);
-            return true;
+            try {
+                userRepository.save(user);
+                return true;
+            } catch (HibernateException ex) {
+                ex.printStackTrace();
+                return false;
+            }
+
         } else {
             return false;
         }

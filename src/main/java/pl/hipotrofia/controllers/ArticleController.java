@@ -56,7 +56,7 @@ public class ArticleController {
         return articleDtoConverter.convertToDto(articlesService.findAllForAdmin());
     }
 
-    @PostMapping("/addArticle")
+    @PostMapping("/add")
     public List<ArticleDto> addArticle(@RequestBody ArticleDto articleDto) {
 
         long milis = System.currentTimeMillis();
@@ -88,7 +88,7 @@ public class ArticleController {
         return articleDtoConverter.convertToDto(articlesService.findArticlesByPages(articleDto.getPage()));
     }
 
-    @PostMapping("/editArticle")
+    @PostMapping("/edit")
     public List<ArticleDto> editArticle(@RequestBody ArticleDto articleDto) {
 
         long milis = System.currentTimeMillis();

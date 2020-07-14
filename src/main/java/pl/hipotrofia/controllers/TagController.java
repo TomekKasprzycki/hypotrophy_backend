@@ -20,12 +20,12 @@ public class TagController {
         this.tagDtoConverter = tagDtoConverter;
     }
 
-    @GetMapping("/getAllTags")
+    @GetMapping("/getAll")
     public List<TagDto> getAllTags(){
         return tagDtoConverter.convertToDto(tagService.getAll());
     }
 
-    @GetMapping("/addTag")
+    @GetMapping("/add")
     public List<TagDto> addTag(@RequestParam String tagName){
 
         Tag tag = new Tag();
@@ -35,10 +35,20 @@ public class TagController {
         return tagDtoConverter.convertToDto(tagService.getAll());
     }
 
-    @DeleteMapping("/deleteTag")
+    @DeleteMapping("/delete")
     public List<TagDto> deleteTag(@RequestBody TagDto tagDto){
 
         tagService.deleteTag(tagDtoConverter.convertFromDto(tagDto));
+
+        return tagDtoConverter.convertToDto(tagService.getAll());
+    }
+
+    @GetMapping("/edit")
+    public List<TagDto> editTag(@RequestParam Long id, @RequestParam String tagName){
+
+        Tag tag = tagService.findTagById(id);
+        tag.setName(tagName);
+        tagService.addTag(tag);
 
         return tagDtoConverter.convertToDto(tagService.getAll());
     }

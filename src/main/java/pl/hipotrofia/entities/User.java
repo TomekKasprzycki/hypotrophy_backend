@@ -20,7 +20,7 @@ public class User {
     @Column(columnDefinition = "varchar(50)")
     private String name;
     @NotNull
-    @Column(columnDefinition = "varchar(50)")
+    @Column(columnDefinition = "varchar(50)", unique = true)
     private String email;
     @NotNull
     private String password;
@@ -40,6 +40,8 @@ public class User {
     private boolean active;
     @OneToMany(mappedBy = "modifiedBy")
     private List<ArticleModification> changes;
+    @OneToOne
+    private Token token;
 
 
     public void setPassword(String unHashedPassword) {

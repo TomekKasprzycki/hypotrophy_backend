@@ -31,7 +31,7 @@ public class MessageController {
         return messageDtoConverter.convertToDto(messageService.findAllByArticle(id));
     }
 
-    @PostMapping("/addMessage")
+    @PostMapping("/add")
     public List<MessageDto> addMessage(@RequestBody MessageDto messageDto) {
 
         Message message = messageDtoConverter.convertFromDto(messageDto);
@@ -41,10 +41,20 @@ public class MessageController {
         return messageDtoConverter.convertToDto(messageService.findAllByArticle(messageDto.getArticleId()));
     }
 
-    @DeleteMapping("/deleteMessage")
+    @DeleteMapping("/delete")
     public List<MessageDto> deleteMessage(@RequestBody MessageDto messageDto) {
 
         messageService.deleteMessage(messageDtoConverter.convertFromDto(messageDto));
+
+        return messageDtoConverter.convertToDto(messageService.findAllByArticle(messageDto.getArticleId()));
+    }
+
+    @PostMapping("/edit")
+    public List<MessageDto> editMessage(@RequestBody MessageDto messageDto) {
+
+        Message message = messageDtoConverter.convertFromDto(messageDto);
+        message.setArticle(articlesService.findArticleById(messageDto.getArticleId()));
+        messageService.addMessage(message);
 
         return messageDtoConverter.convertToDto(messageService.findAllByArticle(messageDto.getArticleId()));
     }

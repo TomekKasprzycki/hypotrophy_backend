@@ -27,13 +27,13 @@ public class ChildrenController {
         this.userService = userService;
     }
 
-    @GetMapping("/myChildren")
+    @GetMapping("/byUser")
     public List<ChildrenDto> getUserChildren(@RequestParam Long parentId) {
 
         return childrenDtoConverter.convertToDto(childrenService.getUserChildren(parentId));
     }
 
-    @PostMapping("/addChild")
+    @PostMapping("/add")
     public List<ChildrenDto> addChild(@RequestParam ChildrenDto childDto) {
 
         Children child = childrenDtoConverter.convertFromDto(childDto);
@@ -49,7 +49,7 @@ public class ChildrenController {
         return childrenDtoConverter.convertToDto(childrenService.getUserChildren(childDto.getParent()));
     }
 
-    @DeleteMapping("/removeChild")
+    @DeleteMapping("/delete")
     public List<ChildrenDto> removeChild(@RequestBody ChildrenDto childDto) {
         Children child = childrenDtoConverter.convertFromDto(childDto);
 
