@@ -10,5 +10,13 @@
         <property name="serverTimezone" value="UTC" />
       </driver-properties>
     </data-source>
+    <data-source source="LOCAL" name="hipotrofia/Hibernate" uuid="31a76366-c2be-4768-9638-6bb71b7128b1">
+      <driver-ref>mysql.8</driver-ref>
+      <synchronize>true</synchronize>
+      <imported>true</imported>
+      <remarks>Hibernate</remarks>
+      <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://localhost:3306/hypotrophy?serverTimezone=UTC</jdbc-url>
+    </data-source>
   </component>
 </project>

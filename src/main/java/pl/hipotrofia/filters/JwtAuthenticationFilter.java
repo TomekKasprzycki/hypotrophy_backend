@@ -29,10 +29,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private final TokenService tokenService;
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager,
-                                   UserService userService, TokenService tokenService) {
+                                   TokenService tokenService,
+                                   UserService userService) {
         this.authenticationManager = authenticationManager;
-        this.userService = userService;
         this.tokenService = tokenService;
+        this.userService = userService;
         setFilterProcessesUrl(SecurityConstants.AUTH_LOGIN_URL);
     }
 
@@ -40,6 +41,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
 
         String header = request.getHeader("TYPE");
+        if (header == null) { return null; }
         UsernamePasswordAuthenticationToken authenticationToken = null;
         UserDto userDto = parseUserDto(request);
 
@@ -55,9 +57,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
             case "Login":
 
-                User user = userService.findUserByEmail(userDto.getEmail());
-                authenticationToken = user != null ?
-                        new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()) : null;
+                try {
+                    User user = userService.findUserByEmail(userDto.getEmail());
+                    if (user.isActive() && user.checkPassword(userDto.getPassword())) {
+                    authenticationToken =
+                            new UsernamePasswordAuthenticationToken(userDto.getEmail(), userDto.getPassword()); };
+                } catch (HibernateException ex) {
+                    ex.printStackTrace();
+                }
                 break;
 
             case "Refresh":
@@ -72,14 +79,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                             FilterChain filterChain, Authentication authentication) {
 
-        UserDto userDto = ((UserDto) authentication.getPrincipal());
-        User user = userService.findUserByEmail(userDto.getEmail());
+
+        final org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+        User user = userService.findUserByEmail(principal.getUsername());
         long currentDateMiliseconds = System.currentTimeMillis();
         long expirationTime = 20 * 60 * 1000; //20 minutes
 
         byte[] signingKey = SecurityConstants.JWT_SECRET.getBytes();
 
-        if (user.checkPassword(userDto.getPassword())) {
             String token = Jwts.builder()
                     .setSubject(user.getEmail())
                     .claim("name", user.getName())
@@ -91,7 +98,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                     .compact();
 
             try {
-                Token createdToken = new Token();
+                Token createdToken = tokenService.findByUser(user);
+                if(createdToken==null) { createdToken = new Token(); }
                 createdToken.setToken(token);
                 createdToken.setActive(true);
                 createdToken.setUser(user);
@@ -100,8 +108,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 ex.printStackTrace();
             }
             response.addHeader(SecurityConstants.TOKEN_HEADER, SecurityConstants.TOKEN_PREFIX + token);
-            
-        }
+
+
     }
 
     private UserDto parseUserDto(HttpServletRequest request) {

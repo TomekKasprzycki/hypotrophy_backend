@@ -1,5 +1,6 @@
 package pl.hipotrofia.controllers;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.hipotrofia.converters.TagDtoConverter;
 import pl.hipotrofia.dto.TagDto;
@@ -20,11 +21,13 @@ public class TagController {
         this.tagDtoConverter = tagDtoConverter;
     }
 
+    //for anonymous
     @GetMapping("/getAll")
     public List<TagDto> getAllTags(){
         return tagDtoConverter.convertToDto(tagService.getAll());
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @GetMapping("/add")
     public List<TagDto> addTag(@RequestParam String tagName){
 
@@ -35,6 +38,7 @@ public class TagController {
         return tagDtoConverter.convertToDto(tagService.getAll());
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @DeleteMapping("/delete")
     public List<TagDto> deleteTag(@RequestBody TagDto tagDto){
 
@@ -43,6 +47,7 @@ public class TagController {
         return tagDtoConverter.convertToDto(tagService.getAll());
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @GetMapping("/edit")
     public List<TagDto> editTag(@RequestParam Long id, @RequestParam String tagName){
 

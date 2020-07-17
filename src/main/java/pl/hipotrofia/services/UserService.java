@@ -34,7 +34,7 @@ public class UserService {
         if (userValidator.isTheUserValid(userDto)) {
             User user = userDtoConverter.convertFromDto(userDto);
             user.setCreated(new Date(milis));
-            user.setRole(roleService.getRole(3L));
+            user.setRole(roleService.getRole(1L));
             try {
                 userRepository.save(user);
                 return true;

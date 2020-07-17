@@ -1,7 +1,11 @@
 package pl.hipotrofia.services;
 
 import org.springframework.stereotype.Service;
+import pl.hipotrofia.entities.ArticleModification;
+import pl.hipotrofia.entities.Articles;
 import pl.hipotrofia.repositories.ArticleModificationRepository;
+
+import java.util.List;
 
 @Service
 public class ArticleModificationService {
@@ -12,6 +16,8 @@ public class ArticleModificationService {
         this.articleModificationRepository=articleModificationRepository;
     }
 
-
+    public List<ArticleModification> getAll(Articles article) {
+        return articleModificationRepository.getAllByArticle(article);
+    }
 
 }

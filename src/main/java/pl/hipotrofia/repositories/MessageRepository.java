@@ -13,6 +13,6 @@ import java.util.List;
 @Transactional
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
-    @Query("select m from Message m join fetch Articles a where m.article=:id")
+    @Query("select m from Message m join fetch Articles a where m.article.id=:id")
     List<Message> findAllById(@Param("id") Long id);
 }
