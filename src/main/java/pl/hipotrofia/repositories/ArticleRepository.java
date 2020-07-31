@@ -15,8 +15,14 @@ import java.util.Optional;
 @Transactional
 public interface ArticleRepository extends JpaRepository<Articles, Long> {
 
-    @Query("select a from Articles a where a.visible=true and a.page=:page")
-    List<Articles> getAllByPage(@Param("page") int page);
+    @Query(nativeQuery = true, value=
+            "select * " +
+                    "from Articles a " +
+                    "where a.visible=true and a.page=:page " +
+                    "order by a.priority, a.rating " +
+                    "limit :limit " +
+                    "offset :offset")
+    List<Articles> getAllByPage(@Param("page") int page, @Param("limit") int limit, @Param("offset") int offset);
 
     @Query("select a from Articles a join fetch User u where a.visible=true and u.email=:author")
     Optional<List<Articles>> getAllByAuthor(@Param("author") String author);

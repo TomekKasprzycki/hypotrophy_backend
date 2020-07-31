@@ -14,7 +14,7 @@ public class Tag {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @NotNull
-    @Column(columnDefinition = "varchar(50)")
+    @Column(columnDefinition = "varchar(50)", unique = true)
     private String name;
     @ManyToMany
     @JoinColumn(name = "article_id", referencedColumnName = "id")

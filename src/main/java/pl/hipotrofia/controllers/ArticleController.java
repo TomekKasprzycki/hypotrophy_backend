@@ -1,6 +1,7 @@
 package pl.hipotrofia.controllers;
 
-import org.hibernate.HibernateException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pl.hipotrofia.converters.ArticleDtoConverter;
 import pl.hipotrofia.dto.ArticleDto;
@@ -13,7 +14,6 @@ import pl.hipotrofia.services.UserService;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/articles")
@@ -34,20 +34,23 @@ public class ArticleController {
         this.userService = userService;
     }
 
-    @GetMapping("/allToPage")
-    public List<ArticleDto> getArticlesToPage(@RequestParam int page) {
+    @GetMapping("/anonymous/allToPage/{limit}/{offset}")
+    public List<ArticleDto> getArticlesToPage(@RequestParam int page, @PathVariable int limit,
+                                              @PathVariable int offset) {
 
-        return articleDtoConverter.convertToDto(articlesService.findArticlesByPages(page));
+        return articleDtoConverter.convertToDto(articlesService.findArticlesByPages(page, limit, offset));
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/notVisible")
     public List<ArticleDto> getAllNotVisible() {
 
         return articleDtoConverter.convertToDto(articlesService.findAllForAdmin());
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/setVisible")
-    public List<ArticleDto> setVisible(@RequestParam Long id){
+    public List<ArticleDto> setVisible(@RequestParam Long id) {
 
         Articles article = articlesService.findArticleById(id);
         article.setVisible(true);
@@ -56,58 +59,89 @@ public class ArticleController {
         return articleDtoConverter.convertToDto(articlesService.findAllForAdmin());
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @PostMapping("/add")
-    public List<ArticleDto> addArticle(@RequestBody ArticleDto articleDto) {
+    public boolean addArticle(@RequestBody ArticleDto articleDto) {
 
-        long milis = System.currentTimeMillis();
+        boolean result = false;
+        final String role = SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString();
+
+        long millis = System.currentTimeMillis();
         Articles article = articleDtoConverter.convertFromDto(articleDto);
         article.setVisible(false); //it should be set on false on the frontend
         article.setPriority(0); //it should be set on 0 on the frontend
         article.setRating(0); //it should be set on 0 on the frontend
-        article.setCreated(new Date(milis));
-        article.setTag(articleDto.getTagsId().stream().map(tagService::findTagById).collect(Collectors.toList()));
-        article.setAuthors(articleDto.getAuthors().keySet().stream().map(userService::findUserById).collect(Collectors.toList()));
+        article.setCreated(new Date(millis));
+
         try {
+            //we need to decide how we'll name the pages --> my proposal 1 - children's history
+            if (role.equals("[ROLE_USER]") && article.getPage() != 1) {
+                return false;
+            }
             articlesService.addArticle(article);
+            result = true;
+
             //TODO send email to AdminMailingList
-        } catch (HibernateException ex) {
+
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
-        return articleDtoConverter.convertToDto(articlesService.findArticlesByPages(articleDto.getPage()));
+        return result;
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @DeleteMapping("/delete")
-    public List<ArticleDto> deleteArticle(@RequestBody ArticleDto articleDto) {
+    public boolean deleteArticle(@RequestBody ArticleDto articleDto) {
+
+        final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        final String role = SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString();
+
+        boolean result = false;
 
         try {
-            articlesService.removeArticle(articleDtoConverter.convertFromDto(articleDto));
-        } catch (HibernateException ex) {
+            final Articles article = articleDtoConverter.convertFromDto(articleDto);
+
+            if (role.equals("[ROLE_ADMIN]") || userName.equals(article.getAuthor().getEmail())) {
+                articlesService.removeArticle(article);
+            }
+
+            result = true;
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
-        return articleDtoConverter.convertToDto(articlesService.findArticlesByPages(articleDto.getPage()));
+        return result;
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @PostMapping("/edit")
-    public List<ArticleDto> editArticle(@RequestBody ArticleDto articleDto) {
+    public boolean editArticle(@RequestBody ArticleDto articleDto) {
 
-        long milis = System.currentTimeMillis();
+        boolean result = false;
+        final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        final String role = SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString();
+
+        long millis = System.currentTimeMillis();
         Articles article = articleDtoConverter.convertFromDto(articleDto);
         ArticleModification articleModification = new ArticleModification();
         articleModification.setArticle(article);
-        articleModification.setDateOfModification(new Date(milis));
+        articleModification.setDateOfModification(new Date(millis));
         articleModification.setModifiedBy(userService.findUserByEmail(articleDto.getModifiedBy()));
         List<ArticleModification> changes = article.getChanges() != null ? article.getChanges() : new ArrayList<>();
         changes.add(articleModification);
         article.setChanges(changes);
 
         try {
-            articlesService.addArticle(article);
-        } catch (HibernateException ex) {
+            if (role.equals("[ROLE_ADMIN]") || userName.equals(article.getAuthor().getEmail())) {
+                articlesService.addArticle(article);
+                //TODO send email to AdminMailingList
+            }
+
+            result = true;
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
-        return articleDtoConverter.convertToDto(articlesService.findArticlesByPages(articleDto.getPage()));
+        return result;
     }
-
 }

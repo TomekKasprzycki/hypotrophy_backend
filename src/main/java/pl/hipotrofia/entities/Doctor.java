@@ -19,8 +19,10 @@ public class Doctor {
     private String region;
     private String street;
     private String building_number;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "specialization_id", referencedColumnName = "id")
     private List<Specialization> specialization;
+    @OneToMany(mappedBy = "doctor")
+    private List<DocEvaluation> evaluation;
 
 }

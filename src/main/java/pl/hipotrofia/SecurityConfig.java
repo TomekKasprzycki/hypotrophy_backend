@@ -2,6 +2,7 @@ package pl.hipotrofia;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -39,16 +40,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(myUserDetailService);
     }
 
-//myUserDetailService,
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and()
                 .csrf().disable()
-                .authorizeRequests()
-                .anyRequest().authenticated()
-                .and()
+                .authorizeRequests(authorizeRequests -> {
+                    authorizeRequests
+                            .antMatchers(HttpMethod.GET, "/api/*/anonymous/**").permitAll()
+                            .anyRequest().authenticated();
+                })
                 .addFilter(new JwtAuthenticationFilter(authenticationManager(), tokenService, userService))
-                .addFilterAfter(new JwtAuthorizationFilter(authenticationManager()), JwtAuthenticationFilter.class)
+                .addFilterAfter(new JwtAuthorizationFilter(authenticationManager(), tokenService), JwtAuthenticationFilter.class)
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }

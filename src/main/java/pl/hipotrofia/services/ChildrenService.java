@@ -27,4 +27,8 @@ public class ChildrenService {
     public void removeChild(Children child) {
         childrenRepository.delete(child);
     }
+
+    public Children getKid(String userName, Long kidId) {
+        return childrenRepository.findChildByParentAndId(userName, kidId);
+    }
 }

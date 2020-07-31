@@ -30,15 +30,15 @@ public class UserService {
 
     public boolean registerUser(UserDto userDto) throws HibernateException {
 
-        long milis = System.currentTimeMillis();
+        long millis = System.currentTimeMillis();
         if (userValidator.isTheUserValid(userDto)) {
             User user = userDtoConverter.convertFromDto(userDto);
-            user.setCreated(new Date(milis));
-            user.setRole(roleService.getRole(1L));
+            user.setCreated(new Date(millis));
+            user.setRole(roleService.getRole(3L));
             try {
                 userRepository.save(user);
                 return true;
-            } catch (HibernateException ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
                 return false;
             }

@@ -1,6 +1,8 @@
 package pl.hipotrofia.controllers;
 
 import org.hibernate.HibernateException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pl.hipotrofia.converters.ChildrenDtoConverter;
 import pl.hipotrofia.dto.ChildrenDto;
@@ -27,53 +29,78 @@ public class ChildrenController {
         this.userService = userService;
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @GetMapping("/byUser")
     public List<ChildrenDto> getUserChildren(@RequestParam Long parentId) {
+
+        final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+
 
         return childrenDtoConverter.convertToDto(childrenService.getUserChildren(parentId));
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @PostMapping("/add")
-    public List<ChildrenDto> addChild(@RequestParam ChildrenDto childDto) {
+    public boolean addChild(@RequestParam ChildrenDto childDto) {
 
+        boolean result = false;
+        final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Children child = childrenDtoConverter.convertFromDto(childDto);
 
         try {
             User parent = userService.findUserById(childDto.getParent());
-            child.setUser(parent);
-            childrenService.addChild(child);
+            if (parent.getEmail().equals(userName)) {
+                child.setUser(parent);
+                childrenService.addChild(child);
+                result = true;
+            }
         } catch (HibernateException ex) {
             ex.printStackTrace();
         }
 
-        return childrenDtoConverter.convertToDto(childrenService.getUserChildren(childDto.getParent()));
+
+        return result;
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @DeleteMapping("/delete")
-    public List<ChildrenDto> removeChild(@RequestBody ChildrenDto childDto) {
+    public boolean removeChild(@RequestBody ChildrenDto childDto) {
+
+        boolean result = false;
         Children child = childrenDtoConverter.convertFromDto(childDto);
+        final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 
         try {
-            childrenService.removeChild(child);
+            if (userName.equals(userService.findUserById(childDto.getParent()).getEmail())) {
+                childrenService.removeChild(child);
+                result = true;
+            }
         } catch (HibernateException ex) {
             ex.printStackTrace();
         }
 
-        return childrenDtoConverter.convertToDto(childrenService.getUserChildren(childDto.getParent()));
+        return result;
 
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @PostMapping("/edit")
-    public List<ChildrenDto> edit(@RequestBody ChildrenDto childDto){
+    public boolean edit(@RequestBody ChildrenDto childDto) {
+
+        boolean result = false;
         Children child = childrenDtoConverter.convertFromDto(childDto);
+        final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 
         try {
-            childrenService.addChild(child);
+            if (userName.equals(userService.findUserById(childDto.getParent()).getEmail())) {
+                childrenService.addChild(child);
+                result = true;
+            }
         } catch (HibernateException ex) {
             ex.printStackTrace();
         }
 
-        return childrenDtoConverter.convertToDto(childrenService.getUserChildren(childDto.getParent()));
+        return result;
     }
 
 }

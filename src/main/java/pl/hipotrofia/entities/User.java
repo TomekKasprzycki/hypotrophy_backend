@@ -31,7 +31,7 @@ public class User {
     @NotNull
     private Date created;
     private Date passwordChange;
-    @ManyToMany(mappedBy = "authors")
+    @OneToMany(mappedBy = "author")
     private List<Articles> article;
     @OneToMany(mappedBy = "author")
     private List<Message> messages;
@@ -42,6 +42,9 @@ public class User {
     private List<ArticleModification> changes;
     @OneToOne
     private Token token;
+    @ManyToMany
+    @JoinColumn(name = "mailingList_id", referencedColumnName = "id")
+    private List<MailingList> mailingList;
 
 
     public void setPassword(String unHashedPassword) {

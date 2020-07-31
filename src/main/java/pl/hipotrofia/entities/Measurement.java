@@ -15,9 +15,9 @@ public class Measurement {
     @ManyToOne
     @JoinColumn(name = "child_id", referencedColumnName = "id")
     private Children child;
-    private int weight;
-    private int height;
-    private int headCircuit;
+    private Integer weight;
+    private Integer height;
+    private Integer headCircuit;
     private Date dateOfMeasure;
 
 }

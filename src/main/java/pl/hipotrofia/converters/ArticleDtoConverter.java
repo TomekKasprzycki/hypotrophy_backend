@@ -2,9 +2,9 @@ package pl.hipotrofia.converters;
 
 import org.springframework.stereotype.Service;
 import pl.hipotrofia.dto.ArticleDto;
+import pl.hipotrofia.dto.UserArticleDto;
 import pl.hipotrofia.entities.Articles;
 import pl.hipotrofia.entities.Tag;
-import pl.hipotrofia.entities.User;
 import pl.hipotrofia.services.TagService;
 import pl.hipotrofia.services.UserService;
 
@@ -28,7 +28,10 @@ public class ArticleDtoConverter {
         articleDto.setId(article.getId());
         articleDto.setTitle(article.getTitle());
         articleDto.setContents(article.getContents());
-        articleDto.setAuthors(article.getAuthors().stream().collect(Collectors.toMap(User::getId, User::getName)));
+            UserArticleDto userArticleDto = new UserArticleDto();
+            userArticleDto.setId(article.getAuthor().getId());
+            userArticleDto.setName(article.getAuthor().getName());
+        articleDto.setAuthor(userArticleDto);
         articleDto.setCreated(article.getCreated());
         articleDto.setTagsId(article.getTag().stream().map(Tag::getId).collect(Collectors.toList()));
         articleDto.setPage(article.getPage());
@@ -49,12 +52,7 @@ public class ArticleDtoConverter {
         article.setRating(articleDto.getRanking());
         article.setPriority(articleDto.getPriority());
         article.setVisible(articleDto.isVisible());
-//        Map<Long, String> mapAuthors = articleDto.getAuthors();
-//        List<User> authors = new ArrayList<>();
-//        for (Long id: mapAuthors.keySet()) {
-//            authors.add(userService.findUserById(id));
-//        }
-        article.setAuthors(articleDto.getAuthors().keySet().stream().map(userService::findUserById).collect(Collectors.toList()));
+        article.setAuthor(userService.findUserById(articleDto.getAuthor().getId()));
         article.setTag(articleDto.getTagsId().stream().map(tagService::findTagById).collect(Collectors.toList()));
 
         return article;

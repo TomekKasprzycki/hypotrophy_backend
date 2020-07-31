@@ -21,4 +21,8 @@ public class TokenService {
     public Token findByUser(User user) {
         return tokenRepository.getByUser(user);
     }
+
+    public Token findByToken(String tokenToDeactivation) {
+        return tokenRepository.getByToken(tokenToDeactivation);
+    }
 }

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -18,9 +19,11 @@ public class MailingList {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    Long id;
+    private Long id;
     @NotNull
     @Column(columnDefinition = "varchar(30)")
-    String name;
+    private String name;
+    @ManyToMany(mappedBy = "mailingList")
+    private List<User> users;
 
 }

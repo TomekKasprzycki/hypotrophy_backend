@@ -8,6 +8,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import pl.hipotrofia.services.TokenService;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -19,14 +20,21 @@ import java.util.Set;
 
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
-    public JwtAuthorizationFilter(AuthenticationManager authenticationManager) {
+    private final TokenService tokenService;
+
+    public JwtAuthorizationFilter(AuthenticationManager authenticationManager,
+                                  TokenService tokenService) {
         super(authenticationManager);
+        this.tokenService = tokenService;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
 
         String header = request.getHeader("Authorization");
+        if (header==null) {
+            header = "WithoutToken";
+        }
 
         UsernamePasswordAuthenticationToken authResult = getAuthentication(header.replace("Bearer ",""));
 
@@ -36,6 +44,16 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     }
 
     private UsernamePasswordAuthenticationToken getAuthentication(String header) {
+
+        try {
+            if (!tokenService.findByToken(header).isActive()) {
+                return null;
+            }
+        } catch (NullPointerException ex){
+            ex.printStackTrace();
+            return null;
+        }
+
         final Jws<Claims> claimsJws = Jwts.parser()
                 .setSigningKey(SecurityConstants.JWT_SECRET.getBytes())
                 .parseClaimsJws(header);

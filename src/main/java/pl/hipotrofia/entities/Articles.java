@@ -24,12 +24,12 @@ public class Articles {
     private String contents;
     @NotNull
     private Date created;
-    @ManyToMany
+    @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private List<User> authors;
+    private User author;
     @OneToMany(mappedBy = "article")
     private List<ArticleModification> changes;
-    @ManyToMany(mappedBy = "article")
+    @ManyToMany(mappedBy = "article", fetch = FetchType.EAGER)
     private List<Tag> tag;
     @OneToMany(mappedBy = "article")
     private List<Message> messages;

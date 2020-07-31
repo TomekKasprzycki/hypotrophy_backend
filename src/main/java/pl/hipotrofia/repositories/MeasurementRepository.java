@@ -6,17 +6,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import pl.hipotrofia.entities.Children;
+import pl.hipotrofia.entities.Measurement;
 
+import java.util.Date;
 import java.util.List;
 
 @Repository
 @Transactional
-public interface ChildrenRepository extends JpaRepository<Children, Long> {
+public interface MeasurementRepository extends JpaRepository<Measurement, Long> {
 
-    @Query("select c from Children c where c.user.id=:parentId")
-    List<Children> findAllByParentId(@Param("parentId") Long parentId);
-
-    @Query("select ch from Children ch join fetch User where ch.id=:kidId and ch.user.email=:userName")
-    Children findChildByParentAndId(@Param("userName") String userName,@Param("kidId") Long kidId);
-
+    @Query("select m from Measurement m where m.child=:kid and m.child.dateOfBirth<:today and m.weight>0")
+    List<Measurement> findAllWeightByKid(@Param("kid") Children kid, @Param("today") Date today);
 }

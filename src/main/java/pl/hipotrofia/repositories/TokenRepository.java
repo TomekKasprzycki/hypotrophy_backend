@@ -14,4 +14,7 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
 
     @Query("select t from Token t where t.user=:user")
     Token getByUser(@Param("user") User user);
+
+    @Query("select t from Token t where t.token=:tokenToDeactivation")
+    Token getByToken(@Param("tokenToDeactivation") String tokenToDeactivation);
 }
