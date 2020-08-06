@@ -21,4 +21,8 @@ public class Role {
     @OneToMany(mappedBy = "role")
     List<User> user;
 
+    @Override
+    public String toString() {
+        return name;
+    }
 }

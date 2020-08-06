@@ -25,7 +25,7 @@ public class User {
     @NotNull
     private String password;
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;
     @NotNull
@@ -45,6 +45,9 @@ public class User {
     @ManyToMany
     @JoinColumn(name = "mailingList_id", referencedColumnName = "id")
     private List<MailingList> mailingList;
+    @OneToOne(fetch = FetchType.EAGER)
+    private VerificationToken verificationToken;
+    private String photoLink; // encja dla zdjęć?
 
 
     public void setPassword(String unHashedPassword) {
@@ -55,4 +58,8 @@ public class User {
         return BCrypt.checkpw(unHashedPassword, this.password);
     }
 
+    @Override
+    public String toString() {
+        return email;
+    }
 }

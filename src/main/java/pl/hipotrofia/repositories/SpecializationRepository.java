@@ -19,4 +19,9 @@ public interface SpecializationRepository extends JpaRepository<Specialization, 
 
     @Query("select s from Specialization s where s.id=:id")
     Specialization findSpecializationById(@Param("id") Long id);
+
+    @Query(nativeQuery = true, value = "select * from specialization " +
+            "inner join doctor_specialization ds on specialization.id = ds.specialization_id " +
+            "where ds.doctor_id=:id")
+    List<Specialization> findAllByDoctorId(@Param("id") Long id);
 }

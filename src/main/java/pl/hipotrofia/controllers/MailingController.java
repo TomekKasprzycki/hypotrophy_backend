@@ -17,7 +17,7 @@ public class MailingController {
         this.mailService = mailService;
     }
 
-    @GetMapping("/sendMail")
+    @GetMapping("/api/mail/anonymous/sendMail")
     public String sendMail() throws MessagingException {
         mailService.sendMail("tomasz.kasprzycki@gmail.com",
                 "Test mailingu",

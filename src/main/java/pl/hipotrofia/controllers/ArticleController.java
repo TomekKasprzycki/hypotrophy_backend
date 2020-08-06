@@ -34,11 +34,19 @@ public class ArticleController {
         this.userService = userService;
     }
 
-    @GetMapping("/anonymous/allToPage/{limit}/{offset}")
-    public List<ArticleDto> getArticlesToPage(@RequestParam int page, @PathVariable int limit,
+
+    @GetMapping("/anonymous/allToPage/{page}/{limit}/{offset}")
+    public List<ArticleDto> getArticlesToPage(@PathVariable int page, @PathVariable int limit,
                                               @PathVariable int offset) {
 
-        return articleDtoConverter.convertToDto(articlesService.findArticlesByPages(page, limit, offset));
+        List<Articles> articles = null;
+        try {
+            articles = articlesService.findArticlesByPages(page, limit, offset);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+        }
+        return articleDtoConverter.convertToDto(articles);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -74,8 +82,7 @@ public class ArticleController {
         article.setCreated(new Date(millis));
 
         try {
-            //we need to decide how we'll name the pages --> my proposal 1 - children's history
-            if (role.equals("[ROLE_USER]") && article.getPage() != 1) {
+            if (role.equals("[ROLE_USER]") && article.getPage() != 2) {
                 return false;
             }
             articlesService.addArticle(article);

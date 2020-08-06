@@ -5,14 +5,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import pl.hipotrofia.entities.Role;
+import pl.hipotrofia.entities.VerificationToken;
 
 @Repository
 @Transactional
-public interface RoleRepository extends JpaRepository<Role, Long> {
+public interface VerificationTokenRepository extends JpaRepository<VerificationToken, Long> {
 
-    Role getRoleById(Long id);
-
-    @Query("select r from Role r where r.name=:roleName")
-    Role getRoleByName(@Param("roleName") String roleName);
+    @Query("select vt from VerificationToken vt where vt.token=:token")
+    VerificationToken findAllByVerificationToken(@Param("token") String token);
 }

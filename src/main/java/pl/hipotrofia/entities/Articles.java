@@ -24,7 +24,7 @@ public class Articles {
     private String contents;
     @NotNull
     private Date created;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User author;
     @OneToMany(mappedBy = "article")
@@ -38,4 +38,11 @@ public class Articles {
     private int rating; //on creation set value on 0
     private boolean visible;
 
+    @Override
+    public String toString() {
+        return "Articles{" +
+                "title='" + title + '\'' +
+                ", contents='" + contents + '\'' +
+                '}';
+    }
 }

@@ -22,6 +22,7 @@ public class DoctorDtoConverter {
     public DoctorDto convertToDto(Doctor doctor) {
 
         DoctorDto doctorDto = new DoctorDto();
+        List<Specialization> specializations = specializationService.getAllByDoctorId(doctor.getId());
 
         doctorDto.setId(doctor.getId());
         doctorDto.setFirstName(doctor.getFirstName());
@@ -31,7 +32,7 @@ public class DoctorDtoConverter {
         doctorDto.setStreet(doctor.getStreet());
         doctorDto.setBuilding_number(doctor.getBuilding_number());
         doctorDto.setZip_code(doctor.getZip_code());
-        doctorDto.setSpecialization(doctor.getSpecialization().stream()
+        doctorDto.setSpecialization(specializations.stream()
                 .collect(Collectors.toMap(Specialization::getId, Specialization::getNameOfSpecialization)));
         doctorDto.setAvgEvaluation(doctor.getEvaluation().stream().collect(Collectors.averagingDouble(DocEvaluation::getEvaluation)));
 

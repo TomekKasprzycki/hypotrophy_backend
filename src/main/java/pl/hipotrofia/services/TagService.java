@@ -31,4 +31,7 @@ public class TagService {
         return tagRepository.getById(id);
     }
 
+    public List<Tag> findAllByArticle(Long id) {
+        return tagRepository.getAllByArticle(id);
+    }
 }

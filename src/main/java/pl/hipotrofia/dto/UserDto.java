@@ -10,6 +10,7 @@ public class UserDto {
     private String email;
     private String password;
     private String password2;
-    private String roleId;
+    private String roleName;
+    private boolean active;
     
 }

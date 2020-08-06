@@ -16,7 +16,8 @@ public class DoctorService {
     }
 
     public List<Doctor> getAll(int limit, int offset) {
-        return doctorRepository.findAlmostAll(limit, offset);
+        List<Doctor> doctors = doctorRepository.findAlmostAll(limit, offset);
+        return doctors;
     }
 
     public void add(Doctor doctor) {

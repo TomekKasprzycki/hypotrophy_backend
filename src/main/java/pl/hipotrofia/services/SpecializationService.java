@@ -23,4 +23,12 @@ public class SpecializationService {
     public Specialization getById(Long id) {
         return specializationRepository.findSpecializationById(id);
     }
+
+    public List<Specialization> getAll() {
+        return specializationRepository.findAll();
+    }
+
+    public List<Specialization> getAllByDoctorId(Long id) {
+        return specializationRepository.findAllByDoctorId(id);
+    }
 }
