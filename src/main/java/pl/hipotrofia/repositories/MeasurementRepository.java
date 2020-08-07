@@ -8,13 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.hipotrofia.entities.Children;
 import pl.hipotrofia.entities.Measurement;
 
-import java.util.Date;
 import java.util.List;
 
 @Repository
 @Transactional
 public interface MeasurementRepository extends JpaRepository<Measurement, Long> {
 
-    @Query("select m from Measurement m where m.child=:kid and m.child.dateOfBirth<:today and m.weight>0")
-    List<Measurement> findAllWeightByKid(@Param("kid") Children kid, @Param("today") Date today);
+    @Query("select m from Measurement m where m.child=:kid")
+    List<Measurement> findAllMeasurementByKid(@Param("kid") Children kid);
 }

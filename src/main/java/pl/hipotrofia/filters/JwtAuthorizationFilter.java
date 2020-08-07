@@ -50,7 +50,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 return null;
             }
         } catch (NullPointerException ex){
-            ex.printStackTrace();
+            System.out.println("Brak tokenu.");
             return null;
         }
 

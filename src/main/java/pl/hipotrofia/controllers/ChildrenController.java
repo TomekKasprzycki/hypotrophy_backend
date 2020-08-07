@@ -1,6 +1,5 @@
 package pl.hipotrofia.controllers;
 
-import org.hibernate.HibernateException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +10,7 @@ import pl.hipotrofia.entities.User;
 import pl.hipotrofia.services.ChildrenService;
 import pl.hipotrofia.services.UserService;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @RestController
@@ -29,19 +29,49 @@ public class ChildrenController {
         this.userService = userService;
     }
 
+    @GetMapping("/anonymous/add")
+    public boolean anonymousAdd() {
+        boolean result = false;
+        
+        try {
+            Children kid = new Children();
+            User user = userService.findUserById(23L);
+            kid.setUser(user);
+            kid.setDateOfBirth(null);
+            kid.setGender(Children.Gender.FEMALE);
+            kid.setName("Jasiu");
+            childrenService.addChild(kid);
+            result = true;
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return result;
+    }
+
+    @GetMapping("/anonymous/get")
+    public List<ChildrenDto> anonymousGet() {
+        return childrenDtoConverter.convertToDto(childrenService.getUserChildren(23L));
+    }
+
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @GetMapping("/byUser")
-    public List<ChildrenDto> getUserChildren(@RequestParam Long parentId) {
+    public List<ChildrenDto> getUserChildren(@RequestParam Long parentId, HttpServletResponse response) {
 
         final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 
-
-        return childrenDtoConverter.convertToDto(childrenService.getUserChildren(parentId));
+        if (userName.equals(userService.findUserById(parentId).getEmail())) {
+            return childrenDtoConverter.convertToDto(childrenService.getUserChildren(parentId));
+        } else {
+            response.setHeader("ERROR", "Brak zgodności dziecka/dzieci z rodzicem");
+            return null;
+        }
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @PostMapping("/add")
-    public boolean addChild(@RequestParam ChildrenDto childDto) {
+    public boolean addChild(@RequestParam ChildrenDto childDto, HttpServletResponse response) {
 
         boolean result = false;
         final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
@@ -54,8 +84,9 @@ public class ChildrenController {
                 childrenService.addChild(child);
                 result = true;
             }
-        } catch (HibernateException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
+            response.setHeader("ERROR", "Brak zgodności dziecka/dzieci z rodzicem");
         }
 
 
@@ -75,7 +106,7 @@ public class ChildrenController {
                 childrenService.removeChild(child);
                 result = true;
             }
-        } catch (HibernateException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -96,7 +127,7 @@ public class ChildrenController {
                 childrenService.addChild(child);
                 result = true;
             }
-        } catch (HibernateException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 

@@ -5,6 +5,7 @@ import pl.hipotrofia.entities.Children;
 import pl.hipotrofia.repositories.ChildrenRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ChildrenService {
@@ -28,7 +29,7 @@ public class ChildrenService {
         childrenRepository.delete(child);
     }
 
-    public Children getKid(String userName, Long kidId) {
-        return childrenRepository.findChildByParentAndId(userName, kidId);
+    public Optional<Children> getKidById(Long childId) {
+        return childrenRepository.findById(childId);
     }
 }

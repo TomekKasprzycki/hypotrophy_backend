@@ -5,7 +5,6 @@ import pl.hipotrofia.entities.Children;
 import pl.hipotrofia.entities.Measurement;
 import pl.hipotrofia.repositories.MeasurementRepository;
 
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -17,8 +16,11 @@ public class MeasurementService {
         this.measurementRepository=measurementRepository;
     }
 
-    public List<Measurement> getAll(Children kid, Date today) {
-        return measurementRepository.findAllWeightByKid(kid, today);
+    public List<Measurement> getAll(Children kid) {
+        return measurementRepository.findAllMeasurementByKid(kid);
     }
 
+    public void save(Measurement measurement) {
+        measurementRepository.save(measurement);
+    }
 }

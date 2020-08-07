@@ -17,6 +17,7 @@ public class ChildrenDtoConverter {
         childDto.setName(child.getName());
         childDto.setGender(child.getGender());
         childDto.setParent(child.getUser().getId());
+        childDto.setDateOfBirth(child.getDateOfBirth());
 
         return childDto;
     }
