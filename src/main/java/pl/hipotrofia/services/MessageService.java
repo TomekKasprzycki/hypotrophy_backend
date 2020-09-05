@@ -5,6 +5,7 @@ import pl.hipotrofia.entities.Message;
 import pl.hipotrofia.repositories.MessageRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MessageService {
@@ -25,5 +26,9 @@ public class MessageService {
     }
 
     public void deleteMessage(Message message) {
+    }
+
+    public Optional<Message> getById(Long id) {
+        return messageRepository.findById(id);
     }
 }

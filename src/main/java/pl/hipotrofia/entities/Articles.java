@@ -37,6 +37,8 @@ public class Articles {
     private int priority; //on creation set value on 0
     private int rating; //on creation set value on 0
     private boolean visible;
+    @OneToMany(mappedBy = "article")
+    private List<Pictures> pictures;
 
     @Override
     public String toString() {

@@ -38,8 +38,7 @@ public class ArticlesService {
     }
 
     public List<Articles> findAll() {
-        List<Articles> articles = articleRepository.getAll();
-        return articles;
+        return articleRepository.getAll();
     }
 
     public Articles findArticleById(Long id) {
@@ -56,5 +55,9 @@ public class ArticlesService {
 
     public void removeArticle(Articles article) {
         articleRepository.delete(article);
+    }
+
+    public Optional<Articles> getById(Long id) {
+        return articleRepository.findById(id);
     }
 }

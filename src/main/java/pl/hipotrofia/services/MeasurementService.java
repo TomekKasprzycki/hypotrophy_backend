@@ -6,6 +6,7 @@ import pl.hipotrofia.entities.Measurement;
 import pl.hipotrofia.repositories.MeasurementRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MeasurementService {
@@ -22,5 +23,13 @@ public class MeasurementService {
 
     public void save(Measurement measurement) {
         measurementRepository.save(measurement);
+    }
+
+    public Optional<Measurement> getById(Long id) {
+        return measurementRepository.findById(id);
+    }
+
+    public void delete(Measurement measurement) {
+        measurementRepository.delete(measurement);
     }
 }

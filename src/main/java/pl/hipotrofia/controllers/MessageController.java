@@ -1,5 +1,7 @@
 package pl.hipotrofia.controllers;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pl.hipotrofia.converters.MessageDtoConverter;
 import pl.hipotrofia.dto.MessageDto;
@@ -7,9 +9,11 @@ import pl.hipotrofia.entities.Message;
 import pl.hipotrofia.services.ArticlesService;
 import pl.hipotrofia.services.MessageService;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @RestController
+@PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_PUBLISHER', 'ROLE_ADMIN')")
 @RequestMapping("/api/messages")
 public class MessageController {
 
@@ -25,38 +29,67 @@ public class MessageController {
         this.articlesService = articlesService;
     }
 
-    @GetMapping("/byArticle")
+    @GetMapping("/anonymous/byArticle")
     public List<MessageDto> getMessagesByArticle(@RequestParam Long id) {
-
         return messageDtoConverter.convertToDto(messageService.findAllByArticle(id));
     }
 
     @PostMapping("/add")
-    public List<MessageDto> addMessage(@RequestBody MessageDto messageDto) {
+    public void addMessage(@RequestBody MessageDto messageDto, HttpServletResponse response) {
 
-        Message message = messageDtoConverter.convertFromDto(messageDto);
-        message.setArticle(articlesService.findArticleById(messageDto.getArticleId()));
-        messageService.addMessage(message);
+        try {
+            Message message = messageDtoConverter.convertFromDto(messageDto);
+            message.setArticle(articlesService.findArticleById(messageDto.getArticleId()));
+            messageService.addMessage(message);
+            response.setStatus(201);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            response.setStatus(404);
+            response.setHeader("ERROR", ex.getMessage());
+        }
 
-        return messageDtoConverter.convertToDto(messageService.findAllByArticle(messageDto.getArticleId()));
     }
 
     @DeleteMapping("/delete")
-    public List<MessageDto> deleteMessage(@RequestBody MessageDto messageDto) {
+    public void deleteMessage(@RequestParam Long id, HttpServletResponse response) {
 
-        messageService.deleteMessage(messageDtoConverter.convertFromDto(messageDto));
+        final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        final String role = SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString();
 
-        return messageDtoConverter.convertToDto(messageService.findAllByArticle(messageDto.getArticleId()));
+
+        try {
+            Message message = messageService.getById(id).orElseThrow(NullPointerException::new);
+            if(role.equals("[ADMIN]") || userName.equals(message.getAuthor().getEmail())) {
+            messageService.deleteMessage(message);
+            response.setStatus(200); } else {
+                response.setStatus(403);
+            }
+        } catch (NullPointerException exception) {
+            exception.printStackTrace();
+            response.setStatus(404);
+        }
+
     }
 
     @PostMapping("/edit")
-    public List<MessageDto> editMessage(@RequestBody MessageDto messageDto) {
+    public void editMessage(@RequestBody MessageDto messageDto, HttpServletResponse response) {
 
-        Message message = messageDtoConverter.convertFromDto(messageDto);
-        message.setArticle(articlesService.findArticleById(messageDto.getArticleId()));
-        messageService.addMessage(message);
+        final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        final String role = SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString();
 
-        return messageDtoConverter.convertToDto(messageService.findAllByArticle(messageDto.getArticleId()));
+        try {
+            Message message = messageDtoConverter.convertFromDto(messageDto);
+            if(role.equals("[ADMIN]") || userName.equals(message.getAuthor().getEmail())) {
+            message.setArticle(articlesService.findArticleById(messageDto.getArticleId()));
+            messageService.addMessage(message);
+            response.setStatus(200);} else {
+                response.setStatus(403);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            response.setStatus(404);
+            response.setHeader("ERROR", ex.getMessage());
+        }
     }
 
 }

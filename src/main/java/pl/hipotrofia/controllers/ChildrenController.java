@@ -32,7 +32,7 @@ public class ChildrenController {
     @GetMapping("/anonymous/add")
     public boolean anonymousAdd() {
         boolean result = false;
-        
+
         try {
             Children kid = new Children();
             User user = userService.findUserById(23L);
@@ -62,76 +62,84 @@ public class ChildrenController {
         final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 
         if (userName.equals(userService.findUserById(parentId).getEmail())) {
+            response.setStatus(200);
             return childrenDtoConverter.convertToDto(childrenService.getUserChildren(parentId));
         } else {
             response.setHeader("ERROR", "Brak zgodności dziecka/dzieci z rodzicem");
+            response.setStatus(405);
             return null;
         }
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @PostMapping("/add")
-    public boolean addChild(@RequestParam ChildrenDto childDto, HttpServletResponse response) {
+    public void addChild(@RequestParam ChildrenDto childDto, HttpServletResponse response) {
 
-        boolean result = false;
         final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Children child = childrenDtoConverter.convertFromDto(childDto);
 
         try {
             User parent = userService.findUserById(childDto.getParent());
             if (parent.getEmail().equals(userName)) {
+                Children child = childrenDtoConverter.convertFromDto(childDto);
                 child.setUser(parent);
                 childrenService.addChild(child);
-                result = true;
+                response.setStatus(201);
+            } else {
+                response.setStatus(404);
+                response.setHeader("ERROR", "Brak zgodności dziecka/dzieci z rodzicem");
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            response.setHeader("ERROR", "Brak zgodności dziecka/dzieci z rodzicem");
+            response.setStatus(400);
+            response.setHeader("ERROR", ex.getMessage());
         }
 
 
-        return result;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @DeleteMapping("/delete")
-    public boolean removeChild(@RequestBody ChildrenDto childDto) {
+    public void removeChild(@RequestBody ChildrenDto childDto, HttpServletResponse response) {
 
-        boolean result = false;
         Children child = childrenDtoConverter.convertFromDto(childDto);
         final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 
         try {
             if (userName.equals(userService.findUserById(childDto.getParent()).getEmail())) {
                 childrenService.removeChild(child);
-                result = true;
+                response.setStatus(200);
+            } else {
+                response.setStatus(404);
+                response.setHeader("ERROR", "Brak zgodności dziecka/dzieci z rodzicem");
             }
         } catch (Exception ex) {
             ex.printStackTrace();
+            response.setStatus(400);
+            response.setHeader("ERROR", ex.getMessage());
         }
-
-        return result;
 
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @PostMapping("/edit")
-    public boolean edit(@RequestBody ChildrenDto childDto) {
+    public void edit(@RequestBody ChildrenDto childDto, HttpServletResponse response) {
 
-        boolean result = false;
-        Children child = childrenDtoConverter.convertFromDto(childDto);
         final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 
         try {
             if (userName.equals(userService.findUserById(childDto.getParent()).getEmail())) {
+                Children child = childrenDtoConverter.convertFromDto(childDto);
                 childrenService.addChild(child);
-                result = true;
+                response.setStatus(200);
+            } else {
+                response.setStatus(404);
+                response.setHeader("ERROR", "Brak zgodności dziecka/dzieci z rodzicem");
             }
         } catch (Exception ex) {
             ex.printStackTrace();
+            response.setStatus(400);
+            response.setHeader("ERROR", ex.getMessage());
         }
-
-        return result;
     }
 
 }

@@ -4,8 +4,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.hipotrofia.converters.DoctorDtoConverter;
 import pl.hipotrofia.dto.DoctorDto;
+import pl.hipotrofia.entities.Doctor;
 import pl.hipotrofia.services.DoctorService;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @RestController
@@ -28,18 +30,47 @@ public class DoctorController {
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @PostMapping("/add")
-    public boolean addDoctor(@RequestBody DoctorDto doctorDto) {
-
-        boolean result = false;
+    public void addDoctor(@RequestBody DoctorDto doctorDto, HttpServletResponse response) {
 
         try {
             doctorService.add(doctorDtoConverter.convertFromDto(doctorDto));
-            result = true;
+            response.setStatus(200);
         } catch (Exception ex) {
             ex.printStackTrace();
+            response.setStatus(400);
         }
 
-        return result;
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
+    @PostMapping("/edit")
+    public void editDoctor(@RequestBody DoctorDto doctorDto, HttpServletResponse response) {
+
+        try {
+            doctorService.add(doctorDtoConverter.convertFromDto(doctorDto));
+            response.setStatus(201);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            response.setStatus(400);
+        }
+
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
+    @DeleteMapping("/delete")
+    public void deleteDoctor(@RequestParam Long id, HttpServletResponse response) {
+
+        try {
+            Doctor doctor = doctorService.getById(id).orElseThrow(NullPointerException::new);
+            doctorService.remove(doctor);
+            response.setStatus(200);
+        } catch (NullPointerException ex) {
+            ex.printStackTrace();
+            response.setStatus(404);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            response.setStatus(400);
+        }
     }
 
 }
