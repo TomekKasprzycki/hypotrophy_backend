@@ -17,7 +17,7 @@ public class ArticlesService {
         this.articleRepository=articleRepository;
     }
 
-    public List<Articles> findArticlesByPages(int page, int limit, int offset){
+    public Optional<List<Articles>> findArticlesByPages(int page, int limit, int offset){
         return articleRepository.getAllByPage(page,limit,offset);
     }
 

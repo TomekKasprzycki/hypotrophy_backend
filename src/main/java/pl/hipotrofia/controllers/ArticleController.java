@@ -38,21 +38,23 @@ public class ArticleController {
         this.articlesService = articlesService;
         this.mailingService = mailingService;
         this.userService = userService;
-        this.mailingListService=mailingListService;
+        this.mailingListService = mailingListService;
     }
 
 
     @GetMapping("/anonymous/allToPage/{page}/{limit}/{offset}")
     public List<ArticleDto> getArticlesToPage(@PathVariable int page, @PathVariable int limit,
-                                              @PathVariable int offset) {
+                                              @PathVariable int offset, HttpServletResponse response) {
 
-        List<Articles> articles = null;
-        try {
-            articles = articlesService.findArticlesByPages(page, limit, offset);
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        List<Articles> articles = articlesService
+                .findArticlesByPages(page, limit, offset)
+                .orElseThrow(() -> {
+                    NullPointerException ex = new NullPointerException();
+                    response.setStatus(404);
+                    response.setHeader("ERROR", ex.getLocalizedMessage());
+                    return ex;
+                });
 
-        }
         return articleDtoConverter.convertToDto(articles);
     }
 
@@ -83,7 +85,7 @@ public class ArticleController {
 
         try {
             if (role.equals("[ROLE_USER]") && articleDto.getPage() != 2) {
-                response.setStatus(404);
+                response.setStatus(403);
             } else {
                 Articles article = articleDtoConverter.convertFromDto(articleDto);
                 article.setVisible(false); //it should be set on false on the frontend
@@ -101,7 +103,7 @@ public class ArticleController {
                     try {
                         mailingService.sendMail(email, subject,
                                 adminEmailList.get(email) + "!" + "\n\n"
-                                        + contents +"\n\n"
+                                        + contents + "\n\n"
                                         + "Pozdrawiam," + "\n"
                                         + "Backend",
                                 false);

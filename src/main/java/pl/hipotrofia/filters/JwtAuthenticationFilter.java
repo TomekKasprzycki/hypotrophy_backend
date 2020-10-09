@@ -1,8 +1,6 @@
 package pl.hipotrofia.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,7 +15,6 @@ import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Date;
 import java.util.stream.Collectors;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -69,10 +66,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 }
                 break;
 
-            case "Refresh":
-                //TODO
-                break;
-
             case "Logout":
                 String tokenToDeactivation = request.getHeader("Authorization").replace("Bearer ", "");
                 try {
@@ -98,33 +91,29 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         final org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
         User user = userService.findUserByEmail(principal.getUsername());
-        long currentDateMilliseconds = System.currentTimeMillis();
-        long expirationTime = 20 * 60 * 1000; //20 minutes
+        String token = tokenService.createToken(user);
 
-        byte[] signingKey = SecurityConstants.JWT_SECRET.getBytes();
-
-        String token = Jwts.builder()
-                .setSubject(user.getEmail())
-                .claim("name", user.getName())
-                .claim("email", user.getEmail())
-                .claim("role", user.getRole().getName())
-                .setIssuedAt(new Date(currentDateMilliseconds))
-                .setExpiration(new Date(currentDateMilliseconds + expirationTime))
-                .signWith(SignatureAlgorithm.HS256, signingKey)
-                .compact();
 
         try {
             Token createdToken = tokenService.findByUser(user);
             if (createdToken == null) {
                 createdToken = new Token();
+                createdToken.setToken(token);
+                createdToken.setActive(true);
+                createdToken.setUser(user);
+                createdToken = tokenService.addToken(createdToken);
+                user.setToken(createdToken);
+                userService.save(user);
+            } else {
+                createdToken.setToken(token);
+                createdToken.setActive(true);
             }
-            Long id = createdToken.getId();
-            createdToken.setToken(token);
-            createdToken.setActive(true);
-            createdToken.setUser(user);
             tokenService.addToken(createdToken);
+
+
         } catch (Exception ex) {
             ex.printStackTrace();
+            response.setHeader("ERROR", ex.getMessage());
         }
         response.addHeader(SecurityConstants.TOKEN_HEADER, SecurityConstants.TOKEN_PREFIX + token);
 

@@ -40,7 +40,7 @@ public class User {
     private boolean active;
     @OneToMany(mappedBy = "modifiedBy")
     private List<ArticleModification> changes;
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     private Token token;
     @ManyToMany
     @JoinColumn(name = "mailingList_id", referencedColumnName = "id")

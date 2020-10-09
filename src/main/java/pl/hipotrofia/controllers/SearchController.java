@@ -19,16 +19,17 @@ import java.util.Locale;
 @RequestMapping("/api/search")
 public class SearchController {
 
-    private ArticlesService articlesService;
-    private ArticleDtoConverter articleDtoConverter;
+    private final ArticlesService articlesService;
+    private final ArticleDtoConverter articleDtoConverter;
 
-    public SearchController(ArticleDtoConverter articleDtoConverter, ArticlesService articlesService){
-        this.articleDtoConverter=articleDtoConverter;
-        this.articlesService=articlesService;
+    public SearchController(ArticleDtoConverter articleDtoConverter, ArticlesService articlesService) {
+        this.articleDtoConverter = articleDtoConverter;
+        this.articlesService = articlesService;
     }
 
     @GetMapping("/date")
-    public List<ArticleDto> searchByDate(@RequestParam String dateFrom, @RequestParam String dateTo) throws ParseException {
+
+    public List<ArticleDto> searchByDate(@RequestParam String dateFrom, @RequestParam String dateTo) {
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         Date latestDate = null;
@@ -41,16 +42,19 @@ public class SearchController {
             ex.printStackTrace();
         }
 
-            if (latestDate !=null && earliestDate !=null){
-                 return articleDtoConverter.convertToDto(articlesService.findArticlesBetweenDates(earliestDate, latestDate)); }
+        if (latestDate != null && earliestDate != null) {
+            return articleDtoConverter.convertToDto(articlesService.findArticlesBetweenDates(earliestDate, latestDate));
+        }
 
-            if (latestDate == null && earliestDate != null) {
-                return articleDtoConverter.convertToDto(articlesService.findArticlesFromDate(earliestDate)); }
+        if (latestDate == null && earliestDate != null) {
+            return articleDtoConverter.convertToDto(articlesService.findArticlesFromDate(earliestDate));
+        }
 
-            if(latestDate !=null && earliestDate == null){
-                return articleDtoConverter.convertToDto(articlesService.findArticlesToDate(latestDate)); }
+        if (latestDate != null && earliestDate == null) {
+            return articleDtoConverter.convertToDto(articlesService.findArticlesToDate(latestDate));
+        }
 
-            return articleDtoConverter.convertToDto(articlesService.findAll());
+        return articleDtoConverter.convertToDto(articlesService.findAll());
     }
 
     @GetMapping("/byAuthor")
