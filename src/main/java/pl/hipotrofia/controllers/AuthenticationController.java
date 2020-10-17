@@ -2,10 +2,9 @@ package pl.hipotrofia.controllers;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
+import pl.hipotrofia.dto.UserDto;
 import pl.hipotrofia.entities.Token;
 import pl.hipotrofia.entities.User;
 import pl.hipotrofia.filters.SecurityConstants;
@@ -43,15 +42,55 @@ public class AuthenticationController {
         } catch (Exception ex) {
             response.setHeader("ERROR", ex.getMessage());
         }
-
     }
 
     @GetMapping("/anonymous/confirm")
-    public void confirmUser(@RequestParam String token, HttpServletResponse response) {
+    public RedirectView confirmUser(@RequestParam String token, HttpServletResponse response) {
+
         if (userService.verifyToken(token)) {
             response.setHeader("STATUS", "OK");
+            return new RedirectView("http://localhost:3000/login");
         } else {
             response.setHeader("STATUS", "DENIED");
+            return new RedirectView("http://localhost:3000/"); //maybe we should have a page which inform user about that error
+        }
+    }
+
+    @GetMapping("/anonymous/passwordRecovery")
+    public RedirectView passwordRecovery(@RequestParam String email, HttpServletResponse response) {
+
+        if (userService.sendVerificationToken(email)) {
+            return new RedirectView("/success");
+        } else {
+            return new RedirectView("/error");
+        }
+    }
+
+    @GetMapping("/anonymous/confirmPasswordRecovery")
+    public RedirectView confirmPasswordRecovery(@RequestParam String token, @RequestParam String email) {
+
+        if (userService.recoverPassword(token, email)) {
+            return new RedirectView("/success");
+        } else {
+            return new RedirectView("/error");
+        }
+    }
+
+    @PostMapping("/passwordChange")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
+    public void passwordChange(@RequestBody UserDto userDto, HttpServletResponse response) {
+
+        final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+
+        if (userName.equals(userDto.getEmail())) {
+            if (userService.changePassword(userDto)) {
+                response.setHeader("TYPE", "Success");
+            } else {
+                response.setHeader("TYPE", "Declined");
+            }
+        } else {
+            response.setStatus(404);
+            response.setHeader("ERROR", "Something went wrong...");
         }
     }
 

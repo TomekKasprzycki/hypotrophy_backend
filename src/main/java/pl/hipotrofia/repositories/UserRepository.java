@@ -25,4 +25,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("select u from User u where u.token=:id")
     User findByVerificationToken(@Param("id") VerificationToken id);
+
+    @Query("update User u set u.active=false where u=:user")
+    void setNotActive(User user);
+
+    @Query("update User u set u.active=true where u=:user")
+    void setActive(User user);
 }

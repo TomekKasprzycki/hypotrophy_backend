@@ -22,4 +22,9 @@ public class VerificationToken {
     public void setToken() {
         this.token = UUID.randomUUID().toString();
     }
+
+    public void setExpirationDate() {
+        long millis = System.currentTimeMillis();
+        long expirationDateMillis = millis + 24 * 60 * 60 * 1000;
+        this.expirationDate = new Date(expirationDateMillis);}
 }

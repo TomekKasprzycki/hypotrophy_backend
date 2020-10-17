@@ -1,10 +1,11 @@
 package pl.hipotrofia.services;
 
 import org.springframework.stereotype.Service;
+import pl.hipotrofia.entities.User;
 import pl.hipotrofia.entities.VerificationToken;
 import pl.hipotrofia.repositories.VerificationTokenRepository;
 
-import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class VerificationTokenService {
@@ -17,13 +18,12 @@ public class VerificationTokenService {
     }
 
     public VerificationToken createToken() {
-        long millis = System.currentTimeMillis();
-        long expirationDate = millis + 24 * 60 * 60 * 1000;
+
 
         VerificationToken verificationToken = new VerificationToken();
         verificationToken.setToken();
         verificationToken.setActive(true);
-        verificationToken.setExpirationDate(new Date(expirationDate));
+        verificationToken.setExpirationDate();
 
         return verificationToken;
     }
@@ -33,10 +33,14 @@ public class VerificationTokenService {
     }
 
     public VerificationToken getByToken(String token) {
-        return verificationTokenRepository.findAllByVerificationToken(token);
+        return verificationTokenRepository.findByToken(token);
     }
 
     public void remove(VerificationToken verificationToken) {
         verificationTokenRepository.delete(verificationToken);
+    }
+
+    public Optional<VerificationToken> getByUser(User user) {
+        return verificationTokenRepository.findByUser(user);
     }
 }
