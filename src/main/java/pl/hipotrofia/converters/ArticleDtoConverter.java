@@ -17,7 +17,8 @@ public class ArticleDtoConverter {
     private final UserService userService;
     private final TagService tagService;
 
-    public ArticleDtoConverter(UserService userService, TagService tagService) {
+    public ArticleDtoConverter(UserService userService,
+                               TagService tagService) {
         this.userService = userService;
         this.tagService = tagService;
     }

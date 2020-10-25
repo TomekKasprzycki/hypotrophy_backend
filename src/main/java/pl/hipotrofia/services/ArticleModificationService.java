@@ -20,4 +20,7 @@ public class ArticleModificationService {
         return articleModificationRepository.getAllByArticle(article);
     }
 
+    public void add(ArticleModification articleModification) {
+        articleModificationRepository.save(articleModification);
+    }
 }

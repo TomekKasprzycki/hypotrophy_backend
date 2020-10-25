@@ -27,7 +27,7 @@ public class SearchController {
         this.articlesService = articlesService;
     }
 
-    @GetMapping("/date")
+    @GetMapping("/anonymous/date")
 
     public List<ArticleDto> searchByDate(@RequestParam String dateFrom, @RequestParam String dateTo) {
 
@@ -57,7 +57,7 @@ public class SearchController {
         return articleDtoConverter.convertToDto(articlesService.findAll());
     }
 
-    @GetMapping("/byAuthor")
+    @GetMapping("/anonymous/byAuthor")
     public List<ArticleDto> getArticlesByAuthor(@RequestParam String author) { //author = user.email
 
         List<Articles> articles = articlesService.findArticlesByAuthor(author).orElse(null);

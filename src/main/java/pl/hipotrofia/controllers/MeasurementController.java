@@ -34,6 +34,7 @@ public class MeasurementController {
     public List<MeasurementDto> getWeight(@RequestParam Long kidId, HttpServletResponse response) {
 
         List<MeasurementDto> measurementDtoList = new ArrayList<>();
+
         try {
             Children kid = childrenService.getKidById(kidId).orElseThrow(NullPointerException::new);
             measurementDtoList = measurementDtoConverter.convertToDto(measurementService.getAll(kid));
@@ -47,21 +48,17 @@ public class MeasurementController {
             response.setStatus(400);
             response.setHeader("ERROR", "Error");
         }
-
         return measurementDtoList;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_PUBLISHER', 'ROLE_ADMIN')")
     @PostMapping("/add")
-    public boolean add(@RequestBody MeasurementDto measurementDto, HttpServletResponse response) {
-
-        boolean result = false;
+    public void add(@RequestBody MeasurementDto measurementDto, HttpServletResponse response) {
 
         try {
             Measurement measurement = measurementDtoConverter.convertFromDto(measurementDto);
             measurementService.save(measurement);
             response.setStatus(200);
-            result = true;
         } catch (NullPointerException ex) {
             ex.printStackTrace();
             response.setStatus(404);
@@ -71,21 +68,16 @@ public class MeasurementController {
             response.setStatus(400);
             response.setHeader("ERROR", ex.getMessage());
         }
-
-        return result;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_PUBLISHER', 'ROLE_ADMIN')")
     @PostMapping("/edit")
-    public boolean edit(@RequestBody MeasurementDto measurementDto, HttpServletResponse response) {
-
-        boolean result = false;
+    public void edit(@RequestBody MeasurementDto measurementDto, HttpServletResponse response) {
 
         try {
             Measurement measurement = measurementDtoConverter.convertFromDto(measurementDto);
             measurementService.save(measurement);
             response.setStatus(200);
-            result = true;
         } catch (NullPointerException ex) {
             ex.printStackTrace();
             response.setStatus(404);
@@ -95,21 +87,16 @@ public class MeasurementController {
             response.setStatus(400);
             response.setHeader("ERROR", ex.getMessage());
         }
-
-        return result;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_PUBLISHER', 'ROLE_ADMIN')")
     @DeleteMapping("/delete")
-    public boolean delete(@RequestParam Long id, HttpServletResponse response) {
-
-        boolean result = false;
+    public void delete(@RequestParam Long id, HttpServletResponse response) {
 
         try {
             Measurement measurement = measurementService.getById(id).orElseThrow(NegativeArraySizeException::new);
             measurementService.delete(measurement);
             response.setStatus(200);
-            result = true;
         } catch (NullPointerException ex) {
             ex.printStackTrace();
             response.setStatus(404);
@@ -119,8 +106,5 @@ public class MeasurementController {
             response.setStatus(400);
             response.setHeader("ERROR", ex.getMessage());
         }
-
-        return result;
     }
-
 }

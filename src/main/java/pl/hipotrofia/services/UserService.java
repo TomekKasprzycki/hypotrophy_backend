@@ -215,4 +215,9 @@ public class UserService {
             return false;
         }
     }
+
+    public boolean isNameTaken(String name) {
+        return userRepository.isUserNameTaken(name) != 0;
+    }
+
 }

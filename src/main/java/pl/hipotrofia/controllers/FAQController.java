@@ -19,8 +19,8 @@ public class FAQController {
 
     public FAQController(FAQService faqService,
                          FAQDtoConverter faqDtoConverter) {
-        this.faqService=faqService;
-        this.faqDtoConverter=faqDtoConverter;
+        this.faqService = faqService;
+        this.faqDtoConverter = faqDtoConverter;
     }
 
     @GetMapping("/anonymous/getAll")
@@ -41,7 +41,6 @@ public class FAQController {
             ex.printStackTrace();
             response.setStatus(404);
         }
-
     }
 
     @PostMapping("/edit")
@@ -57,7 +56,6 @@ public class FAQController {
             ex.printStackTrace();
             response.setStatus(404);
         }
-
     }
 
     @DeleteMapping("/delete")
@@ -75,7 +73,5 @@ public class FAQController {
             ex.printStackTrace();
             response.setStatus(400);
         }
-
     }
-
 }

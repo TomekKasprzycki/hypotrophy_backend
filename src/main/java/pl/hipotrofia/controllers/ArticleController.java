@@ -7,17 +7,15 @@ import pl.hipotrofia.converters.ArticleDtoConverter;
 import pl.hipotrofia.dto.ArticleDto;
 import pl.hipotrofia.entities.ArticleModification;
 import pl.hipotrofia.entities.Articles;
+import pl.hipotrofia.services.ArticleModificationService;
 import pl.hipotrofia.services.ArticlesService;
-import pl.hipotrofia.services.MailingListService;
 import pl.hipotrofia.services.MailingService;
 import pl.hipotrofia.services.UserService;
 
-import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/articles")
@@ -27,18 +25,18 @@ public class ArticleController {
     private final ArticlesService articlesService;
     private final MailingService mailingService;
     private final UserService userService;
-    private final MailingListService mailingListService;
+    private final ArticleModificationService articleModificationService;
 
     public ArticleController(ArticlesService articlesService,
                              ArticleDtoConverter articleDtoConverter,
                              MailingService mailingService,
                              UserService userService,
-                             MailingListService mailingListService) {
+                             ArticleModificationService articleModificationService) {
         this.articleDtoConverter = articleDtoConverter;
         this.articlesService = articlesService;
         this.mailingService = mailingService;
         this.userService = userService;
-        this.mailingListService = mailingListService;
+        this.articleModificationService=articleModificationService;
     }
 
 
@@ -94,27 +92,12 @@ public class ArticleController {
                 article.setCreated(new Date(millis));
                 articlesService.addArticle(article);
                 response.setStatus(201);
-                Map<String, String> adminEmailList = mailingListService.getMailingList(1L);
 
                 String subject = "Nowy artykuł";
                 String contents = "Proszę o recenzję artykułu o tytule " + article.getTitle();
 
-                adminEmailList.keySet().forEach(email -> {
-                    try {
-                        mailingService.sendMail(email, subject,
-                                adminEmailList.get(email) + "!" + "\n\n"
-                                        + contents + "\n\n"
-                                        + "Pozdrawiam," + "\n"
-                                        + "Backend",
-                                false);
-                        response.setHeader("MAILING", "Success");
-                    } catch (MessagingException e) {
-                        e.printStackTrace();
-                        response.setHeader("MAILING", e.getCause().getMessage());
-                    }
+                mailingService.sendEmailToAdmin(response, subject, contents);
 
-                });
-                //TODO send email to AdminMailingList
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -155,19 +138,32 @@ public class ArticleController {
         final String role = SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString();
 
         try {
+
             Articles article = articlesService.getById(articleDto.getId()).orElseThrow(NullPointerException::new);
+
             if (role.equals("[ROLE_ADMIN]") || userName.equals(article.getAuthor().getEmail())) {
+
                 long millis = System.currentTimeMillis();
+
                 ArticleModification articleModification = new ArticleModification();
                 articleModification.setArticle(article);
                 articleModification.setDateOfModification(new Date(millis));
                 articleModification.setModifiedBy(userService.findUserByEmail(articleDto.getModifiedBy()));
+                articleModificationService.add(articleModification);
+
                 List<ArticleModification> changes = article.getChanges() != null ? article.getChanges() : new ArrayList<>();
-                changes.add(articleModification);
                 article.setChanges(changes);
                 articlesService.addArticle(article);
+
                 response.setStatus(200);
-                //TODO send email to AdminMailingList
+
+                String subject = "Sprawdź edytowany artykuł";
+                String contents = "Wprowadzono zmainy do artykułu: " + article.getTitle() + ".<br/>"
+                + "Proszę o sprawdzenie artykułu i podjęcie adekwatnych czynności.<br/><br/>"
+                        + "Pozdrawaim, <br/>"
+                        + "Backed";
+
+                mailingService.sendEmailToAdmin(response, subject, contents);
 
             } else {
                 response.setStatus(403);

@@ -31,4 +31,12 @@ public class SpecializationService {
     public List<Specialization> getAllByDoctorId(Long id) {
         return specializationRepository.findAllByDoctorId(id);
     }
+
+    public Specialization save(Specialization specialization) {
+        return specializationRepository.save(specialization);
+    }
+
+    public void remove(Specialization specialization) {
+        specializationRepository.delete(specialization);
+    }
 }

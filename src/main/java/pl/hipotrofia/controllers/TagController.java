@@ -8,6 +8,7 @@ import pl.hipotrofia.dto.TagDto;
 import pl.hipotrofia.entities.Tag;
 import pl.hipotrofia.services.TagService;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @RestController
@@ -23,51 +24,44 @@ public class TagController {
     }
 
     @GetMapping("/anonymous/getAll")
-    public List<TagDto> getAllTags(){
-
+    public List<TagDto> getAllTags() {
         return tagDtoConverter.convertToDto(tagService.getAll());
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @PostMapping("/add")
-    public boolean addTag(@RequestBody TagDto tagDto){
-
-        boolean result = false;
+    public TagDto addTag(@RequestBody TagDto tagDto, HttpServletResponse response) {
 
         Tag tag = tagDtoConverter.convertFromDto(tagDto);
 
         try {
-            tagService.addTag(tag);
-            result = true;
+            tag = tagService.addTag(tag);
         } catch (Exception ex) {
             ex.printStackTrace();
+            response.setStatus(404);
         }
 
-        return result;
+        return tagDtoConverter.convertToDto(tag);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @DeleteMapping("/delete}")
-    public boolean deleteTag(@RequestBody TagDto tagDto){
-
-        boolean result = false;
+    public void deleteTag(@RequestBody TagDto tagDto, HttpServletResponse response) {
 
         try {
             tagService.deleteTag(tagDtoConverter.convertFromDto(tagDto));
-            result = true;
         } catch (Exception ex) {
             ex.printStackTrace();
+            response.setHeader("ERROR", ex.getMessage());
         }
-
-        return result;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @PostMapping("/edit}")
-    public List<TagDto> editTag(@RequestBody TagDto tagDto){
+    public List<TagDto> editTag(@RequestBody TagDto tagDto) {
 
         try {
-            Tag tag = tagDtoConverter.convertFromDto(tagDto);;
+            Tag tag = tagDtoConverter.convertFromDto(tagDto);
             tagService.addTag(tag);
         } catch (HibernateException ex) {
             ex.printStackTrace();

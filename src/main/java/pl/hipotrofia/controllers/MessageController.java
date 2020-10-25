@@ -10,6 +10,7 @@ import pl.hipotrofia.services.ArticlesService;
 import pl.hipotrofia.services.MessageService;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -30,8 +31,17 @@ public class MessageController {
     }
 
     @GetMapping("/anonymous/byArticle")
-    public List<MessageDto> getMessagesByArticle(@RequestParam Long id) {
-        return messageDtoConverter.convertToDto(messageService.findAllByArticle(id));
+    public List<MessageDto> getMessagesByArticle(@RequestParam Long id, HttpServletResponse response) {
+
+        List<MessageDto> messageDtoList = new ArrayList<>();
+
+        try {
+            messageDtoList = messageDtoConverter.convertToDto(messageService.findAllByArticle(id));
+        } catch (NullPointerException ex) {
+            ex.printStackTrace();
+            response.setStatus(404);
+        }
+        return messageDtoList;
     }
 
     @PostMapping("/add")
@@ -47,7 +57,6 @@ public class MessageController {
             response.setStatus(404);
             response.setHeader("ERROR", ex.getMessage());
         }
-
     }
 
     @DeleteMapping("/delete")
@@ -55,7 +64,6 @@ public class MessageController {
 
         final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         final String role = SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString();
-
 
         try {
             Message message = messageService.getById(id).orElseThrow(NullPointerException::new);
@@ -68,7 +76,6 @@ public class MessageController {
             exception.printStackTrace();
             response.setStatus(404);
         }
-
     }
 
     @PostMapping("/edit")

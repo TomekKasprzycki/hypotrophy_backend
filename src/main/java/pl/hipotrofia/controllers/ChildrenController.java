@@ -11,6 +11,7 @@ import pl.hipotrofia.services.ChildrenService;
 import pl.hipotrofia.services.UserService;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -29,46 +30,26 @@ public class ChildrenController {
         this.userService = userService;
     }
 
-    @GetMapping("/anonymous/add")
-    public boolean anonymousAdd() {
-        boolean result = false;
-
-        try {
-            Children kid = new Children();
-            User user = userService.findUserById(23L);
-            kid.setUser(user);
-            kid.setDateOfBirth(null);
-            kid.setGender(Children.Gender.FEMALE);
-            kid.setName("Jasiu");
-            childrenService.addChild(kid);
-            result = true;
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        return result;
-    }
-
-    @GetMapping("/anonymous/get")
-    public List<ChildrenDto> anonymousGet() {
-        return childrenDtoConverter.convertToDto(childrenService.getUserChildren(23L));
-    }
-
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @GetMapping("/byUser")
     public List<ChildrenDto> getUserChildren(@RequestParam Long parentId, HttpServletResponse response) {
 
         final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        List<ChildrenDto> childrenDtoList = new ArrayList<>();
 
         if (userName.equals(userService.findUserById(parentId).getEmail())) {
-            response.setStatus(200);
-            return childrenDtoConverter.convertToDto(childrenService.getUserChildren(parentId));
+            try {
+                childrenDtoList = childrenDtoConverter.convertToDto(childrenService.getUserChildren(parentId));
+            } catch (NullPointerException ex){
+                response.setStatus(404);
+                response.setHeader("ERROR", ex.getMessage());
+            }
         } else {
             response.setHeader("ERROR", "Brak zgodności dziecka/dzieci z rodzicem");
             response.setStatus(405);
-            return null;
         }
+
+        return childrenDtoList;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
@@ -86,15 +67,13 @@ public class ChildrenController {
                 response.setStatus(201);
             } else {
                 response.setStatus(404);
-                response.setHeader("ERROR", "Brak zgodności dziecka/dzieci z rodzicem");
+                response.setHeader("ERROR", "Brak zgodności dziecka z rodzicem");
             }
         } catch (Exception ex) {
             ex.printStackTrace();
             response.setStatus(400);
             response.setHeader("ERROR", ex.getMessage());
         }
-
-
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")

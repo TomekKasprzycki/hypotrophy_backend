@@ -31,4 +31,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("update User u set u.active=true where u=:user")
     void setActive(User user);
+
+    @Query("select count(u) from User u where u.name=:name")
+    int isUserNameTaken(String name);
+
 }

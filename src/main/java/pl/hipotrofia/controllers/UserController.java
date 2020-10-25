@@ -5,7 +5,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pl.hipotrofia.converters.UserDtoConverter;
 import pl.hipotrofia.dto.UserDto;
+import pl.hipotrofia.entities.Children;
 import pl.hipotrofia.entities.User;
+import pl.hipotrofia.services.ChildrenService;
 import pl.hipotrofia.services.RoleService;
 import pl.hipotrofia.services.UserService;
 
@@ -19,13 +21,16 @@ public class UserController {
     private final UserService userService;
     private final UserDtoConverter userDtoConverter;
     private final RoleService roleService;
+    private final ChildrenService childrenService;
 
     public UserController(UserService userService,
                           UserDtoConverter userDtoConverter,
-                          RoleService roleService) {
+                          RoleService roleService,
+                          ChildrenService childrenService) {
         this.userDtoConverter = userDtoConverter;
         this.userService = userService;
         this.roleService = roleService;
+        this.childrenService = childrenService;
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -45,6 +50,10 @@ public class UserController {
         try {
             User user = userService.findUserById(id);
             if (role.equals("[ROLE_ADMIN]") ||  user.getEmail().equals(email)) {
+
+                List<Children> children = childrenService.getUserChildren(user.getId());
+                children.forEach(childrenService::removeChild);
+
                 userService.delete(user);
             } else {
                 response.setStatus(405);
@@ -105,6 +114,11 @@ public class UserController {
             response.setHeader("ERROR", ex.getMessage());
             ex.printStackTrace();
         }
+    }
+
+    @PostMapping("/anonymous/checkName")
+    public boolean checkName(@RequestParam String name) {
+        return userService.isNameTaken(name);
     }
 
 }
