@@ -7,15 +7,14 @@ import pl.hipotrofia.converters.ArticleDtoConverter;
 import pl.hipotrofia.dto.ArticleDto;
 import pl.hipotrofia.entities.ArticleModification;
 import pl.hipotrofia.entities.Articles;
-import pl.hipotrofia.services.ArticleModificationService;
-import pl.hipotrofia.services.ArticlesService;
-import pl.hipotrofia.services.MailingService;
-import pl.hipotrofia.services.UserService;
+import pl.hipotrofia.entities.User;
+import pl.hipotrofia.services.*;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/articles")
@@ -26,17 +25,20 @@ public class ArticleController {
     private final MailingService mailingService;
     private final UserService userService;
     private final ArticleModificationService articleModificationService;
+    private final ArticleRatingsService articleRatingsService;
 
     public ArticleController(ArticlesService articlesService,
                              ArticleDtoConverter articleDtoConverter,
                              MailingService mailingService,
                              UserService userService,
-                             ArticleModificationService articleModificationService) {
+                             ArticleModificationService articleModificationService,
+                             ArticleRatingsService articleRatingsService) {
         this.articleDtoConverter = articleDtoConverter;
         this.articlesService = articlesService;
         this.mailingService = mailingService;
         this.userService = userService;
-        this.articleModificationService=articleModificationService;
+        this.articleModificationService = articleModificationService;
+        this.articleRatingsService = articleRatingsService;
     }
 
 
@@ -53,7 +55,24 @@ public class ArticleController {
                     return ex;
                 });
 
-        return articleDtoConverter.convertToDto(articles);
+        List<ArticleDto> articleDtoList = articleDtoConverter.convertToDto(articles);
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+
+        if (email != null) {
+            try {
+                User user = userService.findUserByEmail(email);
+                articleDtoList = articleRatingsService.addUserRatingToArticleDto(articleDtoList, user);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        articleDtoList = articleDtoList.stream()
+                .sorted(Comparator.comparing(ArticleDto::getPriority).thenComparing(ArticleDto::getRanking).reversed())
+                .collect(Collectors.toList());
+
+        return articleDtoList;
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -65,13 +84,12 @@ public class ArticleController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/setVisible")
-    public List<ArticleDto> setVisible(@RequestParam Long id) {
+    public void setVisible(@RequestParam Long id) {
 
         Articles article = articlesService.findArticleById(id);
         article.setVisible(true);
         articlesService.addArticle(article);
 
-        return articleDtoConverter.convertToDto(articlesService.findAllForAdmin());
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
@@ -88,7 +106,6 @@ public class ArticleController {
                 Articles article = articleDtoConverter.convertFromDto(articleDto);
                 article.setVisible(false); //it should be set on false on the frontend
                 article.setPriority(0); //it should be set on 0 on the frontend
-                article.setRating(0); //it should be set on 0 on the frontend
                 article.setCreated(new Date(millis));
                 articlesService.addArticle(article);
                 response.setStatus(201);
@@ -114,7 +131,7 @@ public class ArticleController {
         final String role = SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString();
 
         try {
-            final Articles article = articleDtoConverter.convertFromDto(articleDto);
+            final Articles article = articlesService.getById(articleDto.getId()).orElseThrow(NullPointerException::new);
 
             if (role.equals("[ROLE_ADMIN]") || userName.equals(article.getAuthor().getEmail())) {
                 articlesService.removeArticle(article);
@@ -123,6 +140,9 @@ public class ArticleController {
                 response.setStatus(403);
             }
 
+        } catch (NullPointerException ex) {
+          response.setStatus(404);
+          response.setHeader("ERROR", "Brak takiego artykułu w bazie danych!");
         } catch (Exception ex) {
             ex.printStackTrace();
             response.setStatus(400);
@@ -139,7 +159,7 @@ public class ArticleController {
 
         try {
 
-            Articles article = articlesService.getById(articleDto.getId()).orElseThrow(NullPointerException::new);
+            Articles article = articleDtoConverter.convertFromDto(articleDto);
 
             if (role.equals("[ROLE_ADMIN]") || userName.equals(article.getAuthor().getEmail())) {
 
@@ -151,15 +171,17 @@ public class ArticleController {
                 articleModification.setModifiedBy(userService.findUserByEmail(articleDto.getModifiedBy()));
                 articleModificationService.add(articleModification);
 
-                List<ArticleModification> changes = article.getChanges() != null ? article.getChanges() : new ArrayList<>();
-                article.setChanges(changes);
+                //is this necessary??
+//                List<ArticleModification> changes = article.getChanges() != null ? article.getChanges() : new ArrayList<>();
+//                article.setChanges(changes);
+                article.setVisible(false);
                 articlesService.addArticle(article);
 
                 response.setStatus(200);
 
                 String subject = "Sprawdź edytowany artykuł";
                 String contents = "Wprowadzono zmainy do artykułu: " + article.getTitle() + ".<br/>"
-                + "Proszę o sprawdzenie artykułu i podjęcie adekwatnych czynności.<br/><br/>"
+                        + "Proszę o sprawdzenie artykułu i podjęcie adekwatnych czynności.<br/><br/>"
                         + "Pozdrawaim, <br/>"
                         + "Backed";
 
@@ -168,13 +190,41 @@ public class ArticleController {
             } else {
                 response.setStatus(403);
             }
-        } catch (NullPointerException ex) {
-            ex.printStackTrace();
-            response.setStatus(404);
         } catch (Exception ex) {
             ex.printStackTrace();
             response.setStatus(400);
             response.setHeader("ERROR", ex.getMessage());
         }
     }
+
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
+    @GetMapping("/increaseRating")
+    public void increaseRating(@RequestParam Long articleId, HttpServletResponse response) {
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+
+        try {
+            User user = userService.findUserByEmail(email);
+            articleRatingsService.addUserRating(articleId, user);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            response.setHeader("ERROR", ex.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
+    @GetMapping("/decreaseRating")
+    public void decreaseRating(@RequestParam Long articleId, HttpServletResponse response) {
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+
+        try {
+            User user = userService.findUserByEmail(email);
+            articleRatingsService.remove(articleId, user);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            response.setHeader("ERROR", ex.getMessage());
+        }
+    }
+
 }

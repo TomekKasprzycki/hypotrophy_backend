@@ -96,7 +96,6 @@ public class ChildrenController {
             response.setStatus(400);
             response.setHeader("ERROR", ex.getMessage());
         }
-
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")

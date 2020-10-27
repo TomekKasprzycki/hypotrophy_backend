@@ -18,8 +18,8 @@ public interface ArticleRepository extends JpaRepository<Articles, Long> {
     @Query(nativeQuery = true, value =
             "select * " +
                     "from Articles a " +
+                    "left join article_ratings ar on a.id = ar.article_id " +
                     "where a.visible=true and a.page=:page " +
-                    "order by a.priority, a.rating " +
                     "limit :limit " +
                     "offset :offset")
     Optional<List<Articles>> getAllByPage(@Param("page") int page, @Param("limit") int limit, @Param("offset") int offset);

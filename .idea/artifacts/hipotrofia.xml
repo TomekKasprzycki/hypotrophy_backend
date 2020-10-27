@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="hipotrofia">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="hipotrofia.jar">
+      <element id="artifact" artifact-name="hipotrofia:war exploded" />
+    </root>
+  </artifact>
+</component>

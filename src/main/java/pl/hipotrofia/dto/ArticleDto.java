@@ -19,5 +19,6 @@ public class ArticleDto {
     private int ranking;
     private int priority;
     private boolean visible;
+    private boolean userRating;
 
 }

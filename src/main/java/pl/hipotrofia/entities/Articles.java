@@ -20,7 +20,7 @@ public class Articles {
     @Column(columnDefinition = "varchar(100)")
     private String title;
     @NotNull
-    @Column(columnDefinition = "varchar(5000)") //we need to set good length of text - max 65k of characters
+    @Column(columnDefinition = "text") // max 65k of characters
     private String contents;
     @NotNull
     private Date created;
@@ -35,7 +35,8 @@ public class Articles {
     private List<Message> messages;
     private int page;
     private int priority; //on creation set value on 0
-    private int rating; //on creation set value on 0
+    @OneToMany(mappedBy = "article")
+    private List<ArticleRatings> articleRating;
     private boolean visible;
     @OneToMany(mappedBy = "article")
     private List<Pictures> pictures;

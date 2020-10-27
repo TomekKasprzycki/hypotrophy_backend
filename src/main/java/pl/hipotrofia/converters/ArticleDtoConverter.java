@@ -5,6 +5,7 @@ import pl.hipotrofia.dto.ArticleDto;
 import pl.hipotrofia.dto.UserArticleDto;
 import pl.hipotrofia.entities.Articles;
 import pl.hipotrofia.entities.Tag;
+import pl.hipotrofia.services.ArticleRatingsService;
 import pl.hipotrofia.services.TagService;
 import pl.hipotrofia.services.UserService;
 
@@ -16,11 +17,14 @@ public class ArticleDtoConverter {
 
     private final UserService userService;
     private final TagService tagService;
+    private final ArticleRatingsService articleRatingsService;
 
     public ArticleDtoConverter(UserService userService,
-                               TagService tagService) {
+                               TagService tagService,
+                               ArticleRatingsService articleRatingsService) {
         this.userService = userService;
         this.tagService = tagService;
+        this.articleRatingsService=articleRatingsService;
     }
 
     public ArticleDto convertToDto(Articles article) {
@@ -36,9 +40,10 @@ public class ArticleDtoConverter {
         articleDto.setCreated(article.getCreated());
         articleDto.setTagsId(article.getTag().stream().map(Tag::getId).collect(Collectors.toList()));
         articleDto.setPage(article.getPage());
-        articleDto.setRanking(article.getRating());
+        articleDto.setRanking(articleRatingsService.countByArticle(article));
         articleDto.setPriority(article.getPriority());
         articleDto.setVisible(article.isVisible());
+        articleDto.setUserRating(false);
 
         return articleDto;
     }
@@ -50,7 +55,6 @@ public class ArticleDtoConverter {
         article.setTitle(articleDto.getTitle());
         article.setContents(articleDto.getContents());
         article.setPage(articleDto.getPage());
-        article.setRating(articleDto.getRanking());
         article.setPriority(articleDto.getPriority());
         article.setVisible(articleDto.isVisible());
         article.setAuthor(userService.findUserById(articleDto.getAuthor().getId()));
