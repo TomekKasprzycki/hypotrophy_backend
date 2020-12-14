@@ -43,6 +43,7 @@ public class ArticleController {
 
 
     @GetMapping("/anonymous/allToPage/{page}/{limit}/{offset}")
+
     public List<ArticleDto> getArticlesToPage(@PathVariable int page, @PathVariable int limit,
                                               @PathVariable int offset, HttpServletResponse response) {
 

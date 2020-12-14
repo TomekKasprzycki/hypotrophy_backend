@@ -11,7 +11,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="hipotrofia" target="9" />
+      <module name="hipotrofia" target="11" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">

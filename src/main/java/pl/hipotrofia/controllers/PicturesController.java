@@ -73,7 +73,9 @@ public class PicturesController {
                        @PathVariable int position,
                        HttpServletResponse response) {
 
-        if(!picturesService.removePictures(articleId, position)){
+        String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+
+        if(!picturesService.removePictures(articleId, position, userName)){
           response.setStatus(404);
         }
 

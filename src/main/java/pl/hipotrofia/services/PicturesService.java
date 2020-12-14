@@ -3,6 +3,7 @@ package pl.hipotrofia.services;
 import org.springframework.stereotype.Service;
 import pl.hipotrofia.entities.Articles;
 import pl.hipotrofia.entities.Pictures;
+import pl.hipotrofia.entities.User;
 import pl.hipotrofia.repositories.PicturesRepository;
 
 import javax.servlet.http.HttpServletResponse;
@@ -17,16 +18,21 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.nio.file.Path.*;
+
 @Service
 public class PicturesService {
 
     private final PicturesRepository picturesRepository;
     private final ArticlesService articlesService;
+    private final UserService userService;
 
     public PicturesService(PicturesRepository picturesRepository,
-                           ArticlesService articlesService) {
-        this.picturesRepository=picturesRepository;
-        this.articlesService=articlesService;
+                           ArticlesService articlesService,
+                           UserService userService) {
+        this.picturesRepository = picturesRepository;
+        this.articlesService = articlesService;
+        this.userService = userService;
     }
 
     public Pictures savePicture(Pictures picture) {
@@ -39,7 +45,7 @@ public class PicturesService {
     }
 
     public List<Pictures> getAllByArticleAndPosition(Long articleId, int position) {
-        return picturesRepository.findAllByArticleAndPosition(articleId,position);
+        return picturesRepository.findAllByArticleAndPosition(articleId, position);
     }
 
     public void remove(Pictures picture) {
@@ -53,6 +59,9 @@ public class PicturesService {
     public void addPictures(Long articleId, int position, int typeOfPhoto, HttpServletResponse response, Long userId, Part filePart) throws IOException {
         InputStream fileInputStream = filePart.getInputStream();
         String fileName = filePart.getSubmittedFileName();
+        Path dirPath = of(ServiceConstants.PATH_TO_FILE + "\\" + userId);
+        Path directories = Files.createDirectories(dirPath);
+        String fullPath = directories.toString() + "\\";
 
         switch (typeOfPhoto) {
             case 1:
@@ -66,7 +75,7 @@ public class PicturesService {
                 break;
         }
 
-        File fileToSave = new File(ServiceConstants.PATH_TO_FILE + fileName);
+        File fileToSave = new File(fullPath + fileName);
         String path = fileToSave.getPath();
 
         Long id = null;
@@ -98,24 +107,31 @@ public class PicturesService {
         }
     }
 
-    public boolean removePictures(Long articleId, int position) {
+    public boolean removePictures(Long articleId, int position, String userName) {
 
-        try {
-            List<Pictures> picturesToRemove = getAllByArticleAndPosition(articleId, position);
-            List<Path> pathList = picturesToRemove.stream().map(picture -> Paths.get(picture.getPath())).collect(Collectors.toList());
-            pathList.forEach(path -> {
-                try {
-                    Files.delete(path);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            picturesToRemove.forEach(this::remove);
-            return true;
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        User user = userService.findUserByEmail(userName);
+        Articles article = articlesService.findArticleById(articleId);
+
+        if (article.getAuthor() == user || user.getRole().getId() == 1 || user.getRole().getId() == 2) {
+
+            try {
+                List<Pictures> picturesToRemove = getAllByArticleAndPosition(articleId, position);
+                List<Path> pathList = picturesToRemove.stream().map(picture -> Paths.get(picture.getPath())).collect(Collectors.toList());
+                pathList.forEach(path -> {
+                    try {
+                        Files.delete(path);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+                picturesToRemove.forEach(this::remove);
+                return true;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return false;
+            }
+        } else {
             return false;
         }
     }
-
 }

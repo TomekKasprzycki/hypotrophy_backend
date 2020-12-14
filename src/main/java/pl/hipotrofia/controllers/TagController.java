@@ -45,7 +45,7 @@ public class TagController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PUBLISHER')")
-    @DeleteMapping("/delete}")
+    @DeleteMapping("/delete")
     public void deleteTag(@RequestBody TagDto tagDto, HttpServletResponse response) {
 
         try {
@@ -57,7 +57,7 @@ public class TagController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
-    @PostMapping("/edit}")
+    @PostMapping("/edit")
     public List<TagDto> editTag(@RequestBody TagDto tagDto) {
 
         try {
