@@ -41,6 +41,7 @@ public class ArticleController {
         this.articleRatingsService = articleRatingsService;
     }
 
+    // thnak you :)
 
     @GetMapping("/anonymous/allToPage/{page}/{limit}/{offset}")
 
