@@ -16,8 +16,8 @@ public class Measurement {
     @JoinColumn(name = "child_id", referencedColumnName = "id")
     private Children child;
     private Integer weight;
-    private Integer height;
-    private Integer headCircuit;
+    private Double height;
+    private Double headCircuit;
     private Date dateOfMeasure;
 
 }

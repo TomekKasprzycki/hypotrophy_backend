@@ -8,12 +8,11 @@ import pl.hipotrofia.dto.ArticleDto;
 import pl.hipotrofia.entities.ArticleModification;
 import pl.hipotrofia.entities.Articles;
 import pl.hipotrofia.entities.User;
+import pl.hipotrofia.myExceptions.UserNotFoundException;
 import pl.hipotrofia.services.*;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -42,36 +41,30 @@ public class ArticleController {
     }
 
 
-    @GetMapping("/anonymous/allToPage/{page}/{limit}/{offset}")
+    @GetMapping("/anonymous/allToPage")
 
-    public List<ArticleDto> getArticlesToPage(@PathVariable int page, @PathVariable int limit,
-                                              @PathVariable int offset, HttpServletResponse response) {
+    public List<ArticleDto> getArticlesToPage(@RequestParam int page, @RequestParam int limit,
+                                              @RequestParam int offset, HttpServletResponse response) throws UserNotFoundException {
 
         List<Articles> articles = articlesService
                 .findArticlesByPages(page, limit, offset)
-                .orElseThrow(() -> {
-                    NullPointerException ex = new NullPointerException();
-                    response.setStatus(404);
-                    response.setHeader("ERROR", ex.getLocalizedMessage());
-                    return ex;
-                });
+                .orElse(new ArrayList<>());
 
         List<ArticleDto> articleDtoList = articleDtoConverter.convertToDto(articles);
 
         String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 
-        if (email != null) {
-            try {
-                User user = userService.findUserByEmail(email);
-                articleDtoList = articleRatingsService.addUserRatingToArticleDto(articleDtoList, user);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        if (!email.equals("anonymousUser")) {
 
+                User user = userService.findUserByEmail(email).orElseThrow(() ->
+                    new UserNotFoundException("User not found"));
+                articleDtoList = articleRatingsService.addUserRatingToArticleDto(articleDtoList, user);
+
+        }
         articleDtoList = articleDtoList.stream()
                 .sorted(Comparator.comparing(ArticleDto::getPriority).thenComparing(ArticleDto::getRanking).reversed())
                 .collect(Collectors.toList());
+
 
         return articleDtoList;
     }
@@ -100,28 +93,24 @@ public class ArticleController {
         final String role = SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString();
         long millis = System.currentTimeMillis();
 
-        try {
+
             if (role.equals("[ROLE_USER]") && articleDto.getPage() != 2) {
                 response.setStatus(403);
+                response.setHeader("ERROR","ONLY FOR CREATOR");
             } else {
                 Articles article = articleDtoConverter.convertFromDto(articleDto);
                 article.setVisible(false); //it should be set on false on the frontend
                 article.setPriority(0); //it should be set on 0 on the frontend
                 article.setCreated(new Date(millis));
                 articlesService.addArticle(article);
-                response.setStatus(201);
 
                 String subject = "Nowy artykuł";
                 String contents = "Proszę o recenzję artykułu o tytule " + article.getTitle();
-
+                //todo link to new article
                 mailingService.sendEmailToAdmin(response, subject, contents);
 
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            response.setStatus(400);
-            response.setHeader("ERROR", ex.getMessage());
-        }
+
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
@@ -169,7 +158,7 @@ public class ArticleController {
                 ArticleModification articleModification = new ArticleModification();
                 articleModification.setArticle(article);
                 articleModification.setDateOfModification(new Date(millis));
-                articleModification.setModifiedBy(userService.findUserByEmail(articleDto.getModifiedBy()));
+                articleModification.setModifiedBy(userService.findUserByEmail(articleDto.getModifiedBy()).orElse(null));
                 articleModificationService.add(articleModification);
 
                 //is this necessary??
@@ -205,7 +194,7 @@ public class ArticleController {
         String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 
         try {
-            User user = userService.findUserByEmail(email);
+            User user = userService.findUserByEmail(email).orElseThrow(() -> new UserNotFoundException("Some error"));
             articleRatingsService.addUserRating(articleId, user);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -215,17 +204,13 @@ public class ArticleController {
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @GetMapping("/decreaseRating")
-    public void decreaseRating(@RequestParam Long articleId, HttpServletResponse response) {
+    public void decreaseRating(@RequestParam Long articleId, HttpServletResponse response) throws UserNotFoundException {
 
         String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 
-        try {
-            User user = userService.findUserByEmail(email);
+            User user = userService.findUserByEmail(email).orElseThrow(() -> new UserNotFoundException("Some error"));
             articleRatingsService.remove(articleId, user);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            response.setHeader("ERROR", ex.getMessage());
-        }
+
     }
 
 }

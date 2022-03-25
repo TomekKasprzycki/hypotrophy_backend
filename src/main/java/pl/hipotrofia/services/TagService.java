@@ -27,8 +27,8 @@ public class TagService {
         tagRepository.delete(tag);
     }
 
-    public Tag findTagById(Long id) {
-        return tagRepository.getById(id);
+    public Tag findTagByName(String name) {
+        return tagRepository.getByName(name);
     }
 
     public List<Tag> findAllByArticle(Long id) {

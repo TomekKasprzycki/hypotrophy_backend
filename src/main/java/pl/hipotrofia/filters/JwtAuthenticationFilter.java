@@ -1,6 +1,7 @@
 package pl.hipotrofia.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -8,6 +9,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import pl.hipotrofia.dto.UserDto;
 import pl.hipotrofia.entities.Token;
 import pl.hipotrofia.entities.User;
+import pl.hipotrofia.myExceptions.UserNotFoundException;
 import pl.hipotrofia.services.TokenService;
 import pl.hipotrofia.services.UserService;
 
@@ -33,6 +35,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         setFilterProcessesUrl(SecurityConstants.AUTH_LOGIN_URL);
     }
 
+    @SneakyThrows
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
 
@@ -55,15 +58,13 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
             case "Login":
 
-                try {
-                    User user = userService.findUserByEmail(userDto.getEmail());
+
+                    User user = userService.findUserByEmail(userDto.getEmail()).orElseThrow(() -> new UserNotFoundException("User not found"));
                     if (user.isActive() && user.checkPassword(userDto.getPassword())) {
                         authenticationToken =
                                 new UsernamePasswordAuthenticationToken(userDto.getEmail(), userDto.getPassword());
                     }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+
                 break;
 
             case "Logout":
@@ -84,13 +85,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         return authenticationManager.authenticate(authenticationToken);
     }
 
+    @SneakyThrows
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                             FilterChain filterChain, Authentication authentication) {
 
 
         final org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
-        User user = userService.findUserByEmail(principal.getUsername());
+        User user = userService.findUserByEmail(principal.getUsername()).orElseThrow(() -> new UserNotFoundException("User not found"));
         String token = tokenService.createToken(user);
 
 

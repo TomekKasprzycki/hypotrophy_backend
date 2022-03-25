@@ -13,8 +13,8 @@ import java.util.List;
 @Transactional
 public interface TagRepository extends JpaRepository<Tag, Long> {
 
-    @Query("select t from Tag t where t.id=:id")
-    Tag getById(@Param("id") Long id);
+    @Query("select t from Tag t where t.name=:name")
+    Tag getByName(@Param("name") String name);
 
     @Query(nativeQuery = true, value = "select * from tag inner join tag_article ta on tag.id = ta.tag_id where ta.article_id=:id")
     List<Tag> getAllByArticle(@Param("id") Long id);

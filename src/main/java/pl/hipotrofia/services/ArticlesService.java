@@ -62,4 +62,7 @@ public class ArticlesService {
     }
 
 
+    public int countArticlesByPage(int page) {
+        return articleRepository.countByPage(page);
+    }
 }

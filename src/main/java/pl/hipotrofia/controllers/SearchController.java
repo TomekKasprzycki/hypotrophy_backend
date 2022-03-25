@@ -27,6 +27,9 @@ public class SearchController {
         this.articlesService = articlesService;
     }
 
+    //criteria builder!!!! - wtedy wystarczy jeden endpoint
+    //limit i offset
+
     @GetMapping("/anonymous/date")
 
     public List<ArticleDto> searchByDate(@RequestParam String dateFrom, @RequestParam String dateTo) {

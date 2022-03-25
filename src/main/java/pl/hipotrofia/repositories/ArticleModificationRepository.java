@@ -17,3 +17,5 @@ public interface ArticleModificationRepository extends JpaRepository<ArticleModi
     @Query("select am from ArticleModification am where am.article=:article")
     List<ArticleModification> getAllByArticle(@Param("article") Articles article);
 }
+
+//przeczytać o criteriabuilder

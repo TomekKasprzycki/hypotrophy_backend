@@ -13,6 +13,7 @@ import pl.hipotrofia.services.UserService;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("api/users")
@@ -34,8 +35,8 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping("/getAll/{limit}/{offset}")
-    public List<UserDto> getAll(@PathVariable int limit, @PathVariable int offset) {
+    @GetMapping("/getAll")
+    public List<UserDto> getAll(@RequestParam int limit, @RequestParam int offset) {
 
         return userDtoConverter.convertToDto(userService.getAllLimited(limit, offset));
     }
@@ -94,12 +95,11 @@ public class UserController {
     @PostMapping("/deactivate")
     public void deactivate(@RequestBody UserDto userDto, HttpServletResponse response) {
 
-        try {
-            User user = userService.findUserByEmail(userDto.getEmail());
-            userService.deactivate(user);
-        } catch (Exception ex) {
-            response.setHeader("ERROR", ex.getMessage());
-            ex.printStackTrace();
+        Optional<User> optional = userService.findUserByEmail(userDto.getEmail());
+        if (optional.isPresent()) {
+            userService.deactivate(optional.get());
+        } else {
+            response.setHeader("ERROR", "USER NOT FOUND");
         }
     }
 
@@ -107,13 +107,13 @@ public class UserController {
     @PostMapping("/activate")
     public void setActive(@RequestBody UserDto userDto, HttpServletResponse response) {
 
-        try {
-            User user = userService.findUserByEmail(userDto.getEmail());
-            userService.activate(user);
-        } catch (Exception ex) {
-            response.setHeader("ERROR", ex.getMessage());
-            ex.printStackTrace();
-        }
+
+            Optional<User> optional = userService.findUserByEmail(userDto.getEmail());
+            if (optional.isPresent()) {
+                userService.activate(optional.get());
+            } else {
+                response.setHeader("ERROR", "USER NOT FOUND");
+            }
     }
 
     @PostMapping("/anonymous/checkName")

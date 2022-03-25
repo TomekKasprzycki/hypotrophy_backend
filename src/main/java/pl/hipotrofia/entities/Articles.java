@@ -30,7 +30,7 @@ public class Articles {
     @OneToMany(mappedBy = "article")
     private List<ArticleModification> changes;
     @ManyToMany(mappedBy = "article", fetch = FetchType.EAGER)
-    private List<Tag> tag;
+    private List<Tag> tags;
     @OneToMany(mappedBy = "article")
     private List<Message> messages;
     private int page;

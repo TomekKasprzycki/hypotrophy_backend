@@ -9,13 +9,14 @@ import pl.hipotrofia.entities.User;
 import pl.hipotrofia.entities.VerificationToken;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Transactional
 public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("select u from User u where u.email=:email")
-    User getUserByEmail(@Param("email") String email);
+    Optional<User> getUserByEmail(@Param("email") String email);
 
     @Query("select u from User u where u.id=:parent")
     User getUserById(@Param("parent") Long parent);

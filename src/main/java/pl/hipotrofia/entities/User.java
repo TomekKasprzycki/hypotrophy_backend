@@ -48,6 +48,8 @@ public class User {
     @OneToOne(fetch = FetchType.EAGER)
     private VerificationToken verificationToken;
     private String photoLink; // encja dla zdjęć?
+    @OneToMany(mappedBy = "author")
+    private List<ArticleRatings> userRatings;
 
 
     public void setPassword(String unHashedPassword) {

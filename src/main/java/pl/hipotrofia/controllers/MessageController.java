@@ -30,14 +30,15 @@ public class MessageController {
         this.articlesService = articlesService;
     }
 
-    @GetMapping("/anonymous/byArticle")
-    public List<MessageDto> getMessagesByArticle(@RequestParam Long id, HttpServletResponse response) {
+    //dodać paginację
+    @GetMapping("/anonymous/byArticle/{articleId}")
+    public List<MessageDto> getMessagesByArticle(@PathVariable Long articleId, HttpServletResponse response) {
 
         List<MessageDto> messageDtoList = new ArrayList<>();
 
         try {
-            messageDtoList = messageDtoConverter.convertToDto(messageService.findAllByArticle(id));
-        } catch (NullPointerException ex) {
+            messageDtoList = messageDtoConverter.convertToDto(messageService.findAllByArticle(articleId));
+        } catch (Exception ex) {
             ex.printStackTrace();
             response.setStatus(404);
         }
@@ -54,7 +55,7 @@ public class MessageController {
             response.setStatus(201);
         } catch (Exception ex) {
             ex.printStackTrace();
-            response.setStatus(404);
+            response.setStatus(500);
             response.setHeader("ERROR", ex.getMessage());
         }
     }
@@ -85,7 +86,7 @@ public class MessageController {
         final String role = SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString();
 
         try {
-            Message message = messageDtoConverter.convertFromDto(messageDto);
+            Message message = messageDtoConverter.convertFromDto(messageDto); //to powinno być w serwisie i powinno zapytać bazę danych a nie tylko mapować dto na encję
             if(role.equals("[ADMIN]") || userName.equals(message.getAuthor().getEmail())) {
             message.setArticle(articlesService.findArticleById(messageDto.getArticleId()));
             messageService.addMessage(message);

@@ -27,8 +27,8 @@ public class DoctorController {
         this.mailingService=mailingService;
     }
 
-    @GetMapping("/anonymous/getAll/{limit}/{offset}")
-    public List<DoctorDto> getAll(@PathVariable int limit, @PathVariable int offset) {
+    @GetMapping("/anonymous/getAll")
+    public List<DoctorDto> getAll(@RequestParam int limit, @RequestParam int offset) {
 
         return doctorDtoConverter.convertToDto(doctorService.getAll(limit, offset));
     }

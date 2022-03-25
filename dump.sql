@@ -29,7 +29,7 @@ insert into articles (id, contents, created, page, priority, title, visible, use
 "2020-06-21", 3, 1, "Jasiu",1,2);
 insert into articles (id, contents, created, page, priority, title, visible, user_id) values (3,
 "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?", 
-"2020-06-27", 3, 1,"Kasia",1,2);
+"2020-06-27", 3, 1,"Kasia",1,4);
 insert into articles (id, contents, created, page, priority, title, visible, user_id) values (4,
 "Przyczyny hipotrofii są różnorodne, dlatego dzieli się je na grupy. O nieprawidłowościach wzrastania płodu decydują:
 czynniki matczyne - przede wszystkim choroby układu krążenia, choroby nerek, czynniki immunologiczne, infekcje, zażywane leki, używki;
@@ -40,17 +40,17 @@ czynniki społeczne - ciężka praca fizyczna, niedożywienie, słaba opieka pre
 insert into articles (id, contents, created, page, priority, title, visible, user_id) values (5,
 "Medycyna na obecnym poziomie wiedzy, nie zna skutecznego sposobu na zapobieganie hipotrofii płodu. Wdraża się jedynie leczenie spoczynkowe, które polega na poprawie ukrwienia macicy. Szczególną opiekę zapewnia się matkom cierpiącym na ostre i przewlekłe choroby. Zaleca się także wysokokaloryczne diety wpływające na uzupełnienie niedoborów żywieniowych. W sytuacji zagrożenia życia płodu może zaistnieć konieczność wcześniejszego zakończenia ciąży. Wciąż trwają badania nad skutecznymi sposobami leczenia hipotrofii.
 Odpowiednia diagnoza postawiona przed urodzeniem dziecka to klucz do odpowiedniego postępowania z niemowlakiem hipotroficznym. Pielęgnacja powinna opierać się przede wszystkim na przeprowadzeniu dokładnego wywiadu dotyczącego czynników ryzyka. Przedmiotowe badanie noworodka musi zostać wykonane dokładnie. By zapobiec hipotermii, dziecko powinno się umieścić pod promiennikiem ciepła. Następnie należy osuszyć jego skórę i jeśli to konieczne, umieścić w inkubatorze. Opieka nad dzieckiem hipotroficznym zakłada także wyrównanie zaburzeń metabolicznych: hipoglikemii, hiperglikemii, hipokaliemii. Poza tym istotna okazuje się ocena zaburzeń hematologicznych, ale również leczenie infekcji wrodzonych oraz ewentualnych wad.", 
-"2020-06-27", 2, 3,"Kasia",1,2);
+"2020-06-27", 2, 3,"Kasia",1,4);
 
 #tag_articles
-insert into tag_article (article_id, tag_id) values (2, 1);
-insert into tag_article (article_id, tag_id) values (2, 3);
-insert into tag_article (article_id, tag_id) values (3, 1);
-insert into tag_article (article_id, tag_id) values (3, 2);
-insert into tag_article (article_id, tag_id) values (3, 3);
-insert into tag_article (article_id, tag_id) values (4, 1);
-insert into tag_article (article_id, tag_id) values (4, 3);
-insert into tag_article (article_id, tag_id) values (4, 4);
+insert into tag_article (article_id, tags_id) values (2, 1);
+insert into tag_article (article_id, tags_id) values (2, 3);
+insert into tag_article (article_id, tags_id) values (3, 1);
+insert into tag_article (article_id, tags_id) values (3, 2);
+insert into tag_article (article_id, tags_id) values (3, 3);
+insert into tag_article (article_id, tags_id) values (4, 1);
+insert into tag_article (article_id, tags_id) values (4, 3);
+insert into tag_article (article_id, tags_id) values (4, 4);
 
 #Doctor
 insert into doctor (id, building_number, city,first_name,last_name,region,street,zip_code) values 

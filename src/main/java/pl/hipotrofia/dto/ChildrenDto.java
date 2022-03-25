@@ -10,7 +10,7 @@ public class ChildrenDto {
 
     private Long id;
     private String name;
-    private Long parent;
+    private Long userId; //zmieniono z parent
     private Children.Gender gender;
     private Date dateOfBirth;
 

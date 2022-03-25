@@ -59,7 +59,7 @@ public class ChildrenController {
         final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 
         try {
-            User parent = userService.findUserById(childDto.getParent());
+            User parent = userService.findUserById(childDto.getUserId());
             if (parent.getEmail().equals(userName)) {
                 Children child = childrenDtoConverter.convertFromDto(childDto);
                 child.setUser(parent);
@@ -84,7 +84,7 @@ public class ChildrenController {
         final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 
         try {
-            if (userName.equals(userService.findUserById(childDto.getParent()).getEmail())) {
+            if (userName.equals(userService.findUserById(childDto.getUserId()).getEmail())) {
                 childrenService.removeChild(child);
                 response.setStatus(200);
             } else {
@@ -105,7 +105,7 @@ public class ChildrenController {
         final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 
         try {
-            if (userName.equals(userService.findUserById(childDto.getParent()).getEmail())) {
+            if (userName.equals(userService.findUserById(childDto.getUserId()).getEmail())) {
                 Children child = childrenDtoConverter.convertFromDto(childDto);
                 childrenService.addChild(child);
                 response.setStatus(200);

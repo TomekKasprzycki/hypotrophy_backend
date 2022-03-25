@@ -10,8 +10,8 @@ public class MeasurementDto {
     private Long id;
     private Long childId;
     private Integer weight;
-    private Integer height;
-    private Integer headCircuit;
+    private Double height; //czy mają być połówki cm
+    private Double headCircuit; //czy mają być połówki cm
     private Date dateOfMeasure;
 
 }

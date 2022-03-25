@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import pl.hipotrofia.entities.Articles;
 import pl.hipotrofia.entities.Pictures;
 import pl.hipotrofia.entities.User;
+import pl.hipotrofia.myExceptions.UserNotFoundException;
 import pl.hipotrofia.repositories.PicturesRepository;
 
 import javax.servlet.http.HttpServletResponse;
@@ -107,9 +108,9 @@ public class PicturesService {
         }
     }
 
-    public boolean removePictures(Long articleId, int position, String userName) {
+    public boolean removePictures(Long articleId, int position, String userName) throws UserNotFoundException {
 
-        User user = userService.findUserByEmail(userName);
+        User user = userService.findUserByEmail(userName).orElseThrow(() -> new UserNotFoundException("User not found"));
         Articles article = articlesService.findArticleById(articleId);
 
         if (article.getAuthor() == user || user.getRole().getId() == 1 || user.getRole().getId() == 2) {

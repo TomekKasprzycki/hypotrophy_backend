@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
@@ -32,27 +33,26 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
 
         String header = request.getHeader("Authorization");
-        if (header==null) {
-            header = "WithoutToken";
+
+        if (header != null) {
+            Optional<UsernamePasswordAuthenticationToken> authResult = getAuthentication(header.replace("Bearer ", ""));
+
+            authResult.ifPresent(usernamePasswordAuthenticationToken -> SecurityContextHolder
+                    .getContext()
+                    .setAuthentication(usernamePasswordAuthenticationToken));
         }
 
-        UsernamePasswordAuthenticationToken authResult = getAuthentication(header.replace("Bearer ",""));
-
-        SecurityContextHolder.getContext().setAuthentication(authResult);
 
         chain.doFilter(request, response);
     }
 
-    private UsernamePasswordAuthenticationToken getAuthentication(String header) {
+    private Optional<UsernamePasswordAuthenticationToken> getAuthentication(String header) {
 
-        try {
-            if (!tokenService.findByToken(header).isActive()) {
-                return null;
-            }
-        } catch (NullPointerException ex){
-            System.out.println("Brak tokenu.");
-            return null;
+        //Token musi być Optional
+        if (!tokenService.findByToken(header).isActive()) {
+            return Optional.empty();
         }
+
 
         final Jws<Claims> claimsJws = Jwts.parser()
                 .setSigningKey(SecurityConstants.JWT_SECRET.getBytes())
@@ -63,6 +63,6 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
         final Set<SimpleGrantedAuthority> simpleGrantedAuthority = Collections.singleton(new SimpleGrantedAuthority(role));
 
-        return new UsernamePasswordAuthenticationToken(email, null, simpleGrantedAuthority);
+        return Optional.of(new UsernamePasswordAuthenticationToken(email, null, simpleGrantedAuthority));
     }
 }

@@ -16,6 +16,6 @@ public class DoctorDto {
     private String street;
     private String building_number;
     private Map<Long, String> specialization;
-    private double avgEvaluation;
+    private Double avgEvaluation;
 
 }

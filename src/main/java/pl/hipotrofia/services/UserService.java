@@ -6,12 +6,15 @@ import pl.hipotrofia.converters.UserDtoConverter;
 import pl.hipotrofia.dto.UserDto;
 import pl.hipotrofia.entities.User;
 import pl.hipotrofia.entities.VerificationToken;
+import pl.hipotrofia.myExceptions.UserNotFoundException;
 import pl.hipotrofia.repositories.UserRepository;
 import pl.hipotrofia.validators.UserValidator;
 
+import javax.mail.MessagingException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -97,7 +100,7 @@ public class UserService {
         return userRepository.findByVerificationToken(verificationToken);
     }
 
-    public User findUserByEmail(String email) {
+    public Optional<User> findUserByEmail(String email) {
         return userRepository.getUserByEmail(email);
     }
 
@@ -130,7 +133,8 @@ public class UserService {
         VerificationToken verificationToken;
 
         try {
-            User user = findUserByEmail(email);
+            User user = findUserByEmail(email).orElseThrow(() -> new UserNotFoundException("User not found"));
+
             if (verificationTokenService.getByUser(user).isPresent()) {
                 verificationToken = verificationTokenService.getByUser(user).orElse(new VerificationToken());
                 verificationToken.setActive(true);
@@ -161,24 +165,24 @@ public class UserService {
 
     public boolean recoverPassword(String token, String email) {
 
-        String newPassword;
+        Optional<User> optional = findUserByEmail(email);
 
-        try {
-            User user = findUserByEmail(email);
-            VerificationToken verificationToken = verificationTokenService.getByUser(user).orElseThrow(Exception::new);
+        optional.ifPresent(user -> {
+            VerificationToken verificationToken = verificationTokenService.getByUser(user).orElseThrow();
 
             if (token.equals(verificationToken.getToken())) {
-
-                newPassword = createPassword();
+                String newPassword = createPassword();
                 String emailBody = "<p>Twoje nowe hasło, to: " + newPassword + "</p><br/><br/>";
-                mailingService.sendMail(email, "Odzyskiwanie hasła", emailBody, true);
-
+                try {
+                    mailingService.sendMail(email, "Odzyskiwanie hasła", emailBody, true);
+                    } catch (MessagingException e) {
+                    e.printStackTrace();
+                }
             }
+             
+        });
 
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return false;
-        }
+
         return true;
     }
 
@@ -204,8 +208,8 @@ public class UserService {
     public boolean changePassword(UserDto userDto) {
 
         try {
-            if(userValidator.isTheUserValid(userDto)) {
-                User user = findUserByEmail(userDto.getEmail());
+            if (userValidator.isTheUserValid(userDto)) {
+                User user = findUserByEmail(userDto.getEmail()).orElseThrow(() -> new UserNotFoundException("User not found"));
                 user.setPassword(userDto.getPassword());
                 save(user);
             }

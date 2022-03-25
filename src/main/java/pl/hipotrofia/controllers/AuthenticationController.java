@@ -8,6 +8,7 @@ import pl.hipotrofia.dto.UserDto;
 import pl.hipotrofia.entities.Token;
 import pl.hipotrofia.entities.User;
 import pl.hipotrofia.filters.SecurityConstants;
+import pl.hipotrofia.myExceptions.UserNotFoundException;
 import pl.hipotrofia.services.TokenService;
 import pl.hipotrofia.services.UserService;
 
@@ -28,10 +29,10 @@ public class AuthenticationController {
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @GetMapping("/refresh")
-    public void refresh(HttpServletResponse response) {
+    public void refresh(HttpServletResponse response) throws UserNotFoundException {
 
         final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        User user = userService.findUserByEmail(userName);
+        User user = userService.findUserByEmail(userName).orElseThrow(() -> new UserNotFoundException("User not found"));
 
         try {
             final String token = tokenService.createToken(user);

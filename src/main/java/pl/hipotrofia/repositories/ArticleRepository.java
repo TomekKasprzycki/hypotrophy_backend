@@ -41,4 +41,7 @@ public interface ArticleRepository extends JpaRepository<Articles, Long> {
 
     @Query("select a from Articles a where a.visible=false")
     List<Articles> getAllNotVisible();
+
+    @Query("select count(a) from Articles a where a.page=:page")
+    int countByPage(int page);
 }

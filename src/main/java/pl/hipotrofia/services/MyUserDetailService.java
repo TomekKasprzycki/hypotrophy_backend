@@ -1,6 +1,6 @@
 package pl.hipotrofia.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.SneakyThrows;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.hipotrofia.entities.User;
+import pl.hipotrofia.myExceptions.UserNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,13 +18,17 @@ import java.util.List;
 @Transactional
 public class MyUserDetailService implements UserDetailsService {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
+    public MyUserDetailService(UserService userService) {
+        this.userService = userService;
+    }
+
+    @SneakyThrows
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
-        User user = userService.findUserByEmail(email);
+        User user = userService.findUserByEmail(email).orElseThrow(() -> new UserNotFoundException("User not found"));
         boolean enabled = true;
         boolean accountNonExpired = true;
         boolean credentialsNonExpired = true;

@@ -43,9 +43,9 @@ public class MailingService {
         adminEmailList.keySet().forEach(email -> {
             try {
                 sendMail(email, subject,
-                        adminEmailList.get(email) + "!<br/><br/>"
-                                + contents + "!<br/><br/>"
-                                + "Pozdrawiam," + "<br/>>"
+                        adminEmailList.get(email) + "!\n\n"
+                                + contents + "!\n\n"
+                                + "Pozdrawiam," + "\n"
                                 + "Backend",
                         false);
                 response.setHeader("MAILING", "Success");
@@ -63,9 +63,9 @@ public class MailingService {
         usersEmailList.keySet().forEach(email -> {
             try {
                 sendMail(email, subject,
-                        usersEmailList.get(email) + "!<br/><br/>"
-                                + contents + "<br/><br/>"
-                                + "Pozdrawiamy," + "<br/>"
+                        usersEmailList.get(email) + "!\n\n"
+                                + contents + "\n\n"
+                                + "Pozdrawiamy," + "\n"
                                 + "Zespół hipotrofia.info",
                         false);
                 response.setHeader("MAILING", "Success");
