@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import pl.hipotrofia.entities.Articles;
 import pl.hipotrofia.entities.Pictures;
 import pl.hipotrofia.entities.User;
+import pl.hipotrofia.myExceptions.ArticleNotFoundException;
 import pl.hipotrofia.myExceptions.UserNotFoundException;
 import pl.hipotrofia.repositories.PicturesRepository;
 
@@ -57,7 +58,7 @@ public class PicturesService {
         picturesRepository.deleteById(id);
     }
 
-    public void addPictures(Long articleId, int position, int typeOfPhoto, HttpServletResponse response, Long userId, Part filePart) throws IOException {
+    public void addPictures(Long articleId, int position, int typeOfPhoto, HttpServletResponse response, Long userId, Part filePart) throws IOException, ArticleNotFoundException {
         InputStream fileInputStream = filePart.getInputStream();
         String fileName = filePart.getSubmittedFileName();
         Path dirPath = of(ServiceConstants.PATH_TO_FILE + "\\" + userId);
@@ -81,8 +82,9 @@ public class PicturesService {
 
         Long id = null;
 
+            Articles article = articlesService.findArticleById(articleId)
+                    .orElseThrow(()->new ArticleNotFoundException("Nie odnaleziono artykułu..."));
         try {
-            Articles article = articlesService.findArticleById(articleId);
 
             Pictures picture = new Pictures();
             picture.setFileName(fileName);
@@ -108,10 +110,11 @@ public class PicturesService {
         }
     }
 
-    public boolean removePictures(Long articleId, int position, String userName) throws UserNotFoundException {
+    public boolean removePictures(Long articleId, int position, String userName) throws UserNotFoundException, ArticleNotFoundException {
 
         User user = userService.findUserByEmail(userName).orElseThrow(() -> new UserNotFoundException("User not found"));
-        Articles article = articlesService.findArticleById(articleId);
+        Articles article = articlesService.findArticleById(articleId)
+                .orElseThrow(()->new ArticleNotFoundException("Nie odnaleziono artykułu..."));
 
         if (article.getAuthor() == user || user.getRole().getId() == 1 || user.getRole().getId() == 2) {
 

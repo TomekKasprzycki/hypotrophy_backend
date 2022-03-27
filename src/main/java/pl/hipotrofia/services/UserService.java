@@ -7,6 +7,7 @@ import pl.hipotrofia.dto.UserDto;
 import pl.hipotrofia.entities.User;
 import pl.hipotrofia.entities.VerificationToken;
 import pl.hipotrofia.myExceptions.UserNotFoundException;
+import pl.hipotrofia.myExceptions.VerificationTokenNotFoundException;
 import pl.hipotrofia.repositories.UserRepository;
 import pl.hipotrofia.validators.UserValidator;
 
@@ -104,7 +105,7 @@ public class UserService {
         return userRepository.getUserByEmail(email);
     }
 
-    public User findUserById(Long parent) {
+    public Optional<User> findUserById(Long parent) {
         return userRepository.getUserById(parent);
     }
 
@@ -128,15 +129,16 @@ public class UserService {
         userRepository.setActive(user);
     }
 
-    public boolean sendVerificationToken(String email) {
+    public boolean sendVerificationToken(String email) throws UserNotFoundException, VerificationTokenNotFoundException  {
 
         VerificationToken verificationToken;
 
-        try {
+
             User user = findUserByEmail(email).orElseThrow(() -> new UserNotFoundException("User not found"));
 
             if (verificationTokenService.getByUser(user).isPresent()) {
-                verificationToken = verificationTokenService.getByUser(user).orElse(new VerificationToken());
+                verificationToken = verificationTokenService.getByUser(user)
+                        .orElseThrow(() -> new VerificationTokenNotFoundException("Wystąpił nieoczekiwany błąd! Spróbuj ponownie."));
                 verificationToken.setActive(true);
                 verificationToken.setExpirationDate();
                 verificationToken.setToken();
@@ -153,13 +155,13 @@ public class UserService {
                     "<a href='http://localhost:8081/api/authentication/anonymous/confirmPasswordRecovery?token="
                     + verificationToken.getToken() + "?email=" + email + "' >ZRESETUJ MOJE HASŁO</a><br/><br/>" +
                     "Jeśli prośba nie była wysłana przez Ciebie poinformuje nas o tym wysyłając mail na adres: admin@hipotrofia.info";
-
-            mailingService.sendMail(email, "Odzyskiwanie hasła", emailBody, true);
+            try {
+                mailingService.sendMail(email, "Odzyskiwanie hasła", emailBody, true);
+            } catch (MessagingException ex) {
+                return false;
+            }
             return true;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return false;
-        }
+
     }
 
 

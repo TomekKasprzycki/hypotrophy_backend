@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.hipotrofia.converters.PictureDtoConverter;
 import pl.hipotrofia.dto.PictureDto;
 import pl.hipotrofia.entities.User;
+import pl.hipotrofia.myExceptions.ArticleNotFoundException;
 import pl.hipotrofia.myExceptions.UserNotFoundException;
 import pl.hipotrofia.services.PicturesService;
 import pl.hipotrofia.services.UserService;
@@ -40,7 +41,7 @@ public class PicturesController {
                                @PathVariable int position,
                                @PathVariable int typeOfPhoto,
                                HttpServletResponse response,
-                               HttpServletRequest request) throws IOException, ServletException, UserNotFoundException {
+                               HttpServletRequest request) throws IOException, ServletException, UserNotFoundException, ArticleNotFoundException {
 
         final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         User user = userService.findUserByEmail(userName).orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -72,7 +73,7 @@ public class PicturesController {
     @DeleteMapping("/delete/{articleId}/{position}")
     public void delete(@PathVariable Long articleId,
                        @PathVariable int position,
-                       HttpServletResponse response) throws UserNotFoundException {
+                       HttpServletResponse response) throws UserNotFoundException, ArticleNotFoundException {
 
         String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 

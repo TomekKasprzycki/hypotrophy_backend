@@ -5,7 +5,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pl.hipotrofia.converters.MessageDtoConverter;
 import pl.hipotrofia.dto.MessageDto;
+import pl.hipotrofia.entities.Articles;
 import pl.hipotrofia.entities.Message;
+import pl.hipotrofia.myExceptions.ArticleNotFoundException;
 import pl.hipotrofia.services.ArticlesService;
 import pl.hipotrofia.services.MessageService;
 
@@ -46,11 +48,13 @@ public class MessageController {
     }
 
     @PostMapping("/add")
-    public void addMessage(@RequestBody MessageDto messageDto, HttpServletResponse response) {
+    public void addMessage(@RequestBody MessageDto messageDto, HttpServletResponse response) throws ArticleNotFoundException {
 
+        Articles article = articlesService.findArticleById(messageDto.getArticleId())
+                .orElseThrow(()->new ArticleNotFoundException("Nie odnaleziono artykułu..."));
         try {
             Message message = messageDtoConverter.convertFromDto(messageDto);
-            message.setArticle(articlesService.findArticleById(messageDto.getArticleId()));
+            message.setArticle(article);
             messageService.addMessage(message);
             response.setStatus(201);
         } catch (Exception ex) {
@@ -80,15 +84,18 @@ public class MessageController {
     }
 
     @PostMapping("/edit")
-    public void editMessage(@RequestBody MessageDto messageDto, HttpServletResponse response) {
+    public void editMessage(@RequestBody MessageDto messageDto, HttpServletResponse response) throws ArticleNotFoundException {
 
         final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         final String role = SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString();
 
+        Articles article = articlesService.findArticleById(messageDto.getArticleId())
+                .orElseThrow(()->new ArticleNotFoundException("Nie odnaleziono artykułu..."));
+
         try {
             Message message = messageDtoConverter.convertFromDto(messageDto); //to powinno być w serwisie i powinno zapytać bazę danych a nie tylko mapować dto na encję
             if(role.equals("[ADMIN]") || userName.equals(message.getAuthor().getEmail())) {
-            message.setArticle(articlesService.findArticleById(messageDto.getArticleId()));
+            message.setArticle(article);
             messageService.addMessage(message);
             response.setStatus(200);} else {
                 response.setStatus(403);

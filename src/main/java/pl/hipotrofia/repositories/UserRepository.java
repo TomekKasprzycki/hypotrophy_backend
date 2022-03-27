@@ -19,7 +19,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> getUserByEmail(@Param("email") String email);
 
     @Query("select u from User u where u.id=:parent")
-    User getUserById(@Param("parent") Long parent);
+    Optional<User> getUserById(@Param("parent") Long parent);
 
     @Query(nativeQuery = true, value = "select * from hypotrophy.user limit :limit offset :offset")
     List<User> findAllLimited(@Param("limit") int limit,@Param("offset") int offset);

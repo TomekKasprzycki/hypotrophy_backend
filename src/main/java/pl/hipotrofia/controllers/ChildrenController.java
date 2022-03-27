@@ -2,11 +2,13 @@ package pl.hipotrofia.controllers;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import pl.hipotrofia.converters.ChildrenDtoConverter;
 import pl.hipotrofia.dto.ChildrenDto;
 import pl.hipotrofia.entities.Children;
 import pl.hipotrofia.entities.User;
+import pl.hipotrofia.myExceptions.ChildrenNotFoundException;
 import pl.hipotrofia.services.ChildrenService;
 import pl.hipotrofia.services.UserService;
 
@@ -32,18 +34,19 @@ public class ChildrenController {
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
     @GetMapping("/byUser")
-    public List<ChildrenDto> getUserChildren(@RequestParam Long parentId, HttpServletResponse response) {
+    public List<ChildrenDto> getUserChildren(@RequestParam Long parentId, HttpServletResponse response) throws ChildrenNotFoundException {
 
         final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         List<ChildrenDto> childrenDtoList = new ArrayList<>();
+        User user = userService.findUserById(parentId)
+                .orElseThrow(() -> new UsernameNotFoundException("Nie odnaleziono użytkownika..."));
 
-        if (userName.equals(userService.findUserById(parentId).getEmail())) {
-            try {
-                childrenDtoList = childrenDtoConverter.convertToDto(childrenService.getUserChildren(parentId));
-            } catch (NullPointerException ex){
-                response.setStatus(404);
-                response.setHeader("ERROR", ex.getMessage());
-            }
+        if (userName.equals(user.getEmail())) {
+
+            List<Children> childrenList = childrenService.getUserChildren(parentId)
+                    .orElseThrow(() -> new ChildrenNotFoundException("Nie dodano jeszcze dziecka."));
+            childrenDtoList = childrenDtoConverter.convertToDto(childrenList);
+
         } else {
             response.setHeader("ERROR", "Brak zgodności dziecka/dzieci z rodzicem");
             response.setStatus(405);
@@ -58,22 +61,18 @@ public class ChildrenController {
 
         final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 
-        try {
-            User parent = userService.findUserById(childDto.getUserId());
-            if (parent.getEmail().equals(userName)) {
-                Children child = childrenDtoConverter.convertFromDto(childDto);
-                child.setUser(parent);
-                childrenService.addChild(child);
-                response.setStatus(201);
-            } else {
-                response.setStatus(404);
-                response.setHeader("ERROR", "Brak zgodności dziecka z rodzicem");
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            response.setStatus(400);
-            response.setHeader("ERROR", ex.getMessage());
+        User parent = userService.findUserById(childDto.getUserId())
+                .orElseThrow(() -> new UsernameNotFoundException("Nie odnaleziono użytkownika..."));
+        if (parent.getEmail().equals(userName)) {
+            Children child = childrenDtoConverter.convertFromDto(childDto);
+            child.setUser(parent);
+            childrenService.addChild(child);
+            response.setStatus(201);
+        } else {
+            response.setStatus(404);
+            response.setHeader("ERROR", "Brak zgodności dziecka z rodzicem");
         }
+
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
@@ -83,19 +82,16 @@ public class ChildrenController {
         Children child = childrenDtoConverter.convertFromDto(childDto);
         final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 
-        try {
-            if (userName.equals(userService.findUserById(childDto.getUserId()).getEmail())) {
-                childrenService.removeChild(child);
-                response.setStatus(200);
-            } else {
-                response.setStatus(404);
-                response.setHeader("ERROR", "Brak zgodności dziecka/dzieci z rodzicem");
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            response.setStatus(400);
-            response.setHeader("ERROR", ex.getMessage());
+        User user = userService.findUserById(childDto.getUserId())
+                .orElseThrow(() -> new UsernameNotFoundException("Nie odnaleziono użytkownika..."));
+
+        if (userName.equals(user.getEmail())) {
+            childrenService.removeChild(child);
+        } else {
+            response.setStatus(404);
+            response.setHeader("ERROR", "Brak zgodności dziecka/dzieci z rodzicem");
         }
+
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PUBLISHER')")
@@ -104,20 +100,18 @@ public class ChildrenController {
 
         final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 
-        try {
-            if (userName.equals(userService.findUserById(childDto.getUserId()).getEmail())) {
-                Children child = childrenDtoConverter.convertFromDto(childDto);
-                childrenService.addChild(child);
-                response.setStatus(200);
-            } else {
-                response.setStatus(404);
-                response.setHeader("ERROR", "Brak zgodności dziecka/dzieci z rodzicem");
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            response.setStatus(400);
-            response.setHeader("ERROR", ex.getMessage());
+        User user = userService.findUserById(childDto.getUserId())
+                .orElseThrow(() -> new UsernameNotFoundException("Nie odnaleziono użytkownika..."));
+
+        if (userName.equals(user.getEmail())) {
+            Children child = childrenDtoConverter.convertFromDto(childDto);
+            childrenService.addChild(child);
+
+        } else {
+            response.setStatus(404);
+            response.setHeader("ERROR", "Brak zgodności dziecka/dzieci z rodzicem");
         }
+
     }
 
 }

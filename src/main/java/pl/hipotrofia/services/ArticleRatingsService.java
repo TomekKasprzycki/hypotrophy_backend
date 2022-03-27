@@ -5,6 +5,7 @@ import pl.hipotrofia.dto.ArticleDto;
 import pl.hipotrofia.entities.ArticleRatings;
 import pl.hipotrofia.entities.Articles;
 import pl.hipotrofia.entities.User;
+import pl.hipotrofia.myExceptions.ArticleNotFoundException;
 import pl.hipotrofia.repositories.ArticleRatingsRepository;
 
 import java.util.ArrayList;
@@ -45,8 +46,9 @@ public class ArticleRatingsService {
         return articleDtoList;
     }
 
-    public void addUserRating(Long articleId, User user) {
-        Articles article = articlesService.findArticleById(articleId);
+    public void addUserRating(Long articleId, User user) throws ArticleNotFoundException {
+        Articles article = articlesService.findArticleById(articleId)
+                .orElseThrow(()->new ArticleNotFoundException("Nie odnaleziono artykułu..."));
 
         ArticleRatings articleRating = new ArticleRatings();
         articleRating.setArticle(article);
@@ -55,8 +57,9 @@ public class ArticleRatingsService {
         articleRatingsRepository.save(articleRating);
     }
 
-    public void remove(Long articleId, User author) {
-        Articles article = articlesService.findArticleById(articleId);
+    public void remove(Long articleId, User author) throws ArticleNotFoundException {
+        Articles article = articlesService.findArticleById(articleId)
+                .orElseThrow(()->new ArticleNotFoundException("Nie odnaleziono artykułu..."));
         articleRatingsRepository.deleteByAuthorAndArticle(author, article);
     }
 

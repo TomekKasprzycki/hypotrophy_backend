@@ -44,4 +44,7 @@ public interface ArticleRepository extends JpaRepository<Articles, Long> {
 
     @Query("select count(a) from Articles a where a.page=:page")
     int countByPage(int page);
+
+    @Query("select a from Articles a where a.id=:id")
+    Optional<Articles> getArticleById(Long id);
 }

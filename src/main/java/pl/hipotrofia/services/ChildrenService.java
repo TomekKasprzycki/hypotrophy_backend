@@ -20,7 +20,7 @@ public class ChildrenService {
         this.measurementService=measurementService;
     }
 
-    public List<Children> getUserChildren(Long parentId) {
+    public Optional<List<Children>> getUserChildren(Long parentId) {
         return childrenRepository.findAllByParentId(parentId);
     }
 

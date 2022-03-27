@@ -9,6 +9,7 @@ import pl.hipotrofia.entities.Token;
 import pl.hipotrofia.entities.User;
 import pl.hipotrofia.filters.SecurityConstants;
 import pl.hipotrofia.myExceptions.UserNotFoundException;
+import pl.hipotrofia.myExceptions.VerificationTokenNotFoundException;
 import pl.hipotrofia.services.TokenService;
 import pl.hipotrofia.services.UserService;
 
@@ -31,18 +32,17 @@ public class AuthenticationController {
     @GetMapping("/refresh")
     public void refresh(HttpServletResponse response) throws UserNotFoundException {
 
+        //Is this safe?
+
         final String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         User user = userService.findUserByEmail(userName).orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        try {
-            final String token = tokenService.createToken(user);
-            Token createdToken = tokenService.findByUser(user);
-            createdToken.setToken(token);
-            tokenService.addToken(createdToken);
-            response.addHeader(SecurityConstants.TOKEN_HEADER, SecurityConstants.TOKEN_PREFIX + token);
-        } catch (Exception ex) {
-            response.setHeader("ERROR", ex.getMessage());
-        }
+        final String token = tokenService.createToken(user);
+        Token createdToken = tokenService.findByUser(user);
+        createdToken.setToken(token);
+        tokenService.addToken(createdToken);
+        response.addHeader(SecurityConstants.TOKEN_HEADER, SecurityConstants.TOKEN_PREFIX + token);
+
     }
 
     @GetMapping("/anonymous/confirm")
@@ -58,7 +58,7 @@ public class AuthenticationController {
     }
 
     @GetMapping("/anonymous/passwordRecovery")
-    public RedirectView passwordRecovery(@RequestParam String email, HttpServletResponse response) {
+    public RedirectView passwordRecovery(@RequestParam String email, HttpServletResponse response) throws UserNotFoundException, VerificationTokenNotFoundException {
 
         if (userService.sendVerificationToken(email)) {
             return new RedirectView("/success");
@@ -94,7 +94,6 @@ public class AuthenticationController {
             response.setHeader("ERROR", "Something went wrong...");
         }
     }
-
 
 
 }

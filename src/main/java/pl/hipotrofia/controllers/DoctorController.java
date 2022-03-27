@@ -1,5 +1,6 @@
 package pl.hipotrofia.controllers;
 
+import org.springframework.mail.MailSendException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.hipotrofia.converters.DoctorDtoConverter;
@@ -37,20 +38,13 @@ public class DoctorController {
     @PostMapping("/add")
     public void addDoctor(@RequestBody DoctorDto doctorDto, HttpServletResponse response) {
 
-        try {
             doctorService.add(doctorDtoConverter.convertFromDto(doctorDto));
-            response.setStatus(200);
 
             String subject = "Dodano lekarza";
             String contents = "Dodano nowego lekarza: " + doctorDto.getFirstName() + " " + doctorDto.getLastName() + ".<br/>"
                     + "Sprawdź ten wpis!";
-
-            mailingService.sendEmailToAdmin(response, subject,contents);
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            response.setStatus(400);
-        }
+            //todo link
+            mailingService.sendEmailToAdmin(response, subject, contents);
 
     }
 

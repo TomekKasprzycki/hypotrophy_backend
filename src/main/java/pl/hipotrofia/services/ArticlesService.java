@@ -41,8 +41,8 @@ public class ArticlesService {
         return articleRepository.getAll();
     }
 
-    public Articles findArticleById(Long id) {
-        return articleRepository.getOne(id);
+    public Optional<Articles> findArticleById(Long id) {
+        return articleRepository.getArticleById(id);
     }
 
     public List<Articles> findAllForAdmin() {

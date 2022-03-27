@@ -13,8 +13,8 @@ public class ArticleDto {
     private String contents;
     private Date created;
     private UserArticleDto author;
-    private List<String> tagsName; //można zamienić na String name
-    private String modifiedBy;
+    private List<Long> tagsId; //można zamienić na String name
+    private List<ModificationDto> changes;
     private int page; //enum
     private int ranking;
     private int priority;

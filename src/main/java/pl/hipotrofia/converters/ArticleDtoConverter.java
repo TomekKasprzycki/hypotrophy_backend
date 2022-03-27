@@ -1,5 +1,6 @@
 package pl.hipotrofia.converters;
 
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import pl.hipotrofia.dto.ArticleDto;
 import pl.hipotrofia.dto.UserArticleDto;
@@ -18,13 +19,15 @@ public class ArticleDtoConverter {
     private final UserService userService;
     private final TagService tagService;
     private final ArticleRatingsService articleRatingsService;
+    private final ModificationDtoConverter modificationDtoConverter;
 
     public ArticleDtoConverter(UserService userService,
                                TagService tagService,
-                               ArticleRatingsService articleRatingsService) {
+                               ArticleRatingsService articleRatingsService, ModificationDtoConverter modificationDtoConverter) {
         this.userService = userService;
         this.tagService = tagService;
         this.articleRatingsService=articleRatingsService;
+        this.modificationDtoConverter = modificationDtoConverter;
     }
 
     public ArticleDto convertToDto(Articles article) {
@@ -38,7 +41,8 @@ public class ArticleDtoConverter {
             userArticleDto.setName(article.getAuthor().getName());
         articleDto.setAuthor(userArticleDto);
         articleDto.setCreated(article.getCreated());
-        articleDto.setTagsName(article.getTags().stream().map(Tag::getName).collect(Collectors.toList()));
+        articleDto.setChanges(modificationDtoConverter.convertToDto(article.getChanges()));
+        articleDto.setTagsId(article.getTags().stream().map(Tag::getId).collect(Collectors.toList()));
         articleDto.setPage(article.getPage());
         articleDto.setRanking(articleRatingsService.countByArticle(article));
         articleDto.setPriority(article.getPriority());
@@ -56,9 +60,11 @@ public class ArticleDtoConverter {
         article.setContents(articleDto.getContents());
         article.setPage(articleDto.getPage());
         article.setPriority(articleDto.getPriority());
+        article.setCreated(articleDto.getCreated());
         article.setVisible(articleDto.isVisible());
-        article.setAuthor(userService.findUserById(articleDto.getAuthor().getId()));
-        article.setTags(articleDto.getTagsName().stream().map(tagService::findTagByName).collect(Collectors.toList()));
+        article.setAuthor(userService.findUserById(articleDto.getAuthor().getId())
+                .orElseThrow(()->new UsernameNotFoundException("Nie odnaleziono użytkownika...")));
+        article.setTags(articleDto.getTagsId().stream().map(tagService::findTagById).collect(Collectors.toList()));
 
         return article;
     }
